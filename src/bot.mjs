@@ -13,8 +13,9 @@ export const {
 export const bot = new Bot(token)
 
 const safe = bot.errorBoundary(console.error)
+const privateChat = safe.chatType('private')
 
-safe.command('start', async ctx => {
+privateChat.command('start', async ctx => {
   const sticker = /** @type string */ await kv.get(ctx.match)
   const name = `${ctx.chat.id}by_${ctx.me.username}`
   try {
