@@ -1,3 +1,3 @@
 export const POST = req => {
-    return new Response.json({id: "123"})
+  return Response.json({ id: '123' })
 }
