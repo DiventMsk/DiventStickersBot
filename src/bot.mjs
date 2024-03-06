@@ -34,6 +34,6 @@ privateChat.command('start', async ctx => {
       'static'
     )
   }
-  await ctx.replyWithSticker(sticker)
   await ctx.reply(`Стикер добавлен в набор: t.me/addstickers/${name}`)
+  await ctx.replyWithSticker(sticker)
 })
