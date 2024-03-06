@@ -3,6 +3,7 @@ import { InputFile } from 'grammy'
 
 const { DEFAULT_USER_ID } = process.env
 export const POST = async req => {
+  await bot.init()
   const { file_id } = await bot.api.uploadStickerFile(
     parseInt(DEFAULT_USER_ID),
     'static',
