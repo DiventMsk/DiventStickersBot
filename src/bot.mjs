@@ -12,4 +12,8 @@ export const {
 export const bot = new Bot(token)
 
 // Sample handler for a simple echo bot
-bot.on('message:text', ctx => ctx.reply(ctx.msg.text))
+bot.on('message:text', ctx => {
+  console.log(ctx.match)
+  console.log(ctx.msg.text)
+  return ctx.reply(ctx.msg.text)
+})
