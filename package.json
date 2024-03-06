@@ -1,8 +1,10 @@
 {
+  "license": "MIT",
   "name": "divent-stickers-bot",
   "author": "Vladislav Ponomarev <PonomareVlad@users.noreply.github.com> (https://PonomareVlad.ru)",
   "funding": "https://PonomareVlad.ru/donate",
-  "license": "MIT",
+  "main": "./index.mjs",
+  "bin": "./index.mjs",
   "scripts": {
     "env": "vercel env pull .env",
     "build": "node scripts/build.mjs",
@@ -23,6 +25,5 @@
   },
   "engines": {
     "node": ">=20"
-  },
-  "bin": "./index.mjs"
+  }
 }
