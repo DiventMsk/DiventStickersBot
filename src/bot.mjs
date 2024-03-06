@@ -17,7 +17,7 @@ const privateChat = safe.chatType('private')
 
 privateChat.command('start', async ctx => {
   const sticker = /** @type string */ await kv.get(ctx.match)
-  const name = `${ctx.chat.id}by_${ctx.me.username}`
+  const name = `${ctx.chat.id}_by_${ctx.me.username}`
   const input = { sticker, emoji_list: ['✨'] }
   try {
     await ctx.api.addStickerToSet(ctx.chat.id, name, input)
