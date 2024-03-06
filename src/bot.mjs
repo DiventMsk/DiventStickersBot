@@ -25,14 +25,18 @@ privateChat.command('start', async ctx => {
   const input = { sticker, emoji_list: ['✨'] }
   try {
     await ctx.api.addStickerToSet(ctx.chat.id, name, input)
-  } catch {
-    await ctx.api.createNewStickerSet(
-      ctx.chat.id,
-      name,
-      'Stickers by @DiventDigital',
-      [input],
-      'static'
-    )
+  } catch (error) {
+    try {
+      await ctx.api.createNewStickerSet(
+        ctx.chat.id,
+        name,
+        'Stickers by @DiventDigital',
+        [input],
+        'static'
+      )
+    } catch {
+      throw error
+    }
   }
   await ctx.replyWithSticker(sticker)
   await ctx.reply(`Стикер добавлен в набор: t.me/addstickers/${name}`)
