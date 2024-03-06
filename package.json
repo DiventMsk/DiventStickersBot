@@ -13,6 +13,7 @@
     "start:dev": "vercel dev --listen 3000"
   },
   "dependencies": {
+    "@vercel/kv": "^1.0.1",
     "grammy": "^1.21.1",
     "meow": "^13.2.0",
     "vercel-grammy": "^1.0.0"
