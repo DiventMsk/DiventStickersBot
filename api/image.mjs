@@ -12,7 +12,7 @@ export const POST = async req => {
   const { file_id } = await bot.api.uploadStickerFile(
     parseInt(DEFAULT_USER_ID),
     'static',
-    new InputFile(req.body)
+    new InputFile(req.body, 'sticker.webp')
   )
   await kv.set(id, file_id)
   const url = new URL(bot.botInfo.username, 'https://t.me')
