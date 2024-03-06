@@ -5,7 +5,7 @@ import { kv } from '@vercel/kv'
 const { DEFAULT_USER_ID } = process.env
 export const POST = async req => {
   await bot.init()
-  const id = /** @type string */ req.headers['x-vercel-id'].split(':').pop()
+  const id = /** @type string */ req.headers.get('x-vercel-id').split(':').pop()
   const { file_id } = await bot.api.uploadStickerFile(
     parseInt(DEFAULT_USER_ID),
     'static',
