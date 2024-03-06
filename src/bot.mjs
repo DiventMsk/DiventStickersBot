@@ -14,13 +14,6 @@ export const bot = new Bot(token)
 
 const safe = bot.errorBoundary(console.error)
 
-// Sample handler for a simple echo bot
-safe.on('message:text', ctx => {
-  console.log(ctx.match)
-  console.log(ctx.msg.text)
-  return ctx.reply(ctx.msg.text)
-})
-
 safe.command('start', async ctx => {
   const id = /** @type string */ await kv.get(ctx.match)
   await ctx.replyWithSticker(id)
