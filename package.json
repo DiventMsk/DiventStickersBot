@@ -1,5 +1,5 @@
 {
-  "name": "grammy-vercel",
+  "name": "divent-stickers-bot",
   "author": "Vladislav Ponomarev <PonomareVlad@users.noreply.github.com> (https://PonomareVlad.ru)",
   "funding": "https://PonomareVlad.ru/donate",
   "license": "MIT",
@@ -14,9 +14,14 @@
   },
   "dependencies": {
     "grammy": "^1.21.1",
+    "meow": "^13.2.0",
     "vercel-grammy": "^1.0.0"
   },
+  "devDependencies": {
+    "prettier": "3.2.5"
+  },
   "engines": {
-    "node": ">20.0.0"
-  }
+    "node": ">=20"
+  },
+  "bin": "./index.mjs"
 }
