@@ -16,7 +16,7 @@ const safe = bot.errorBoundary(console.error)
 const privateChat = safe.chatType('private')
 
 privateChat.command('start', async ctx => {
-  const sticker = /** @type string */ await kv.get(ctx.match)
+  const sticker = /** @type string */ await kv.getdel(ctx.match)
   const name = `${ctx.chat.id}_by_${ctx.me.username}`
   const input = { sticker, emoji_list: ['✨'] }
   try {
