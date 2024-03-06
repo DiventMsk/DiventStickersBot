@@ -12,16 +12,16 @@ export const {
 // Default grammY bot instance
 export const bot = new Bot(token)
 
-const safe = bot.errorBoundary(error => {
+const safe = bot.errorBoundary(async ({ error, ctx }) => {
+  await ctx.reply('Не удалось добавить стикер')
   console.error(error)
-  return error.ctx.reply('Не удалось добавить стикер')
 })
+
 const privateChat = safe.chatType('private')
 
 privateChat.command('start', async ctx => {
   const sticker = /** @type string */ await kv.getdel(ctx.match)
   const name = `sitckers_for_${ctx.chat.id}_by_${ctx.me.username}`
-  console.log(name.length, name)
   const input = { sticker, emoji_list: ['✨'] }
   try {
     await ctx.api.addStickerToSet(ctx.chat.id, name, input)
@@ -34,6 +34,6 @@ privateChat.command('start', async ctx => {
       'static'
     )
   }
-  await ctx.reply(`Стикер добавлен в набор: t.me/addstickers/${name}`)
   await ctx.replyWithSticker(sticker)
+  await ctx.reply(`Стикер добавлен в набор: t.me/addstickers/${name}`)
 })
