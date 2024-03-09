@@ -2,14 +2,10 @@ import { Bot } from 'grammy'
 import { kv } from '@vercel/kv'
 
 export const {
-  // Telegram bot token from t.me/BotFather
   TELEGRAM_BOT_TOKEN: token,
-
-  // Secret token to validate incoming updates
   TELEGRAM_SECRET_TOKEN: secretToken = String(token).split(':').pop(),
 } = process.env
 
-// Default grammY bot instance
 export const bot = new Bot(token)
 
 const safe = bot.errorBoundary(async ({ error, ctx }) => {
@@ -20,24 +16,24 @@ const safe = bot.errorBoundary(async ({ error, ctx }) => {
 const privateChat = safe.chatType('private')
 
 privateChat.command('start', async ctx => {
-  const sticker = /** @type string */ await kv.getdel(ctx.match)
+  const images = await kv.lrange(ctx.match, 0, -1)
   const name = `sitckers_for_${ctx.chat.id}_by_${ctx.me.username}`
-  const input = { sticker, emoji_list: ['✨'] }
+  const stickers = images.map(sticker => ({ sticker, emoji_list: ['✨'] }))
   try {
-    await ctx.api.addStickerToSet(ctx.chat.id, name, input)
-  } catch (error) {
-    try {
-      await ctx.api.createNewStickerSet(
-        ctx.chat.id,
-        name,
-        'Stickers by @DiventDigital',
-        [input],
-        'static'
+    await ctx.api.createNewStickerSet(
+      ctx.chat.id,
+      name,
+      'Stickers by @DiventDigital',
+      stickers,
+      'static'
+    )
+  } catch {
+    await Promise.all(
+      stickers.map(sticker =>
+        ctx.api.addStickerToSet(ctx.chat.id, name, sticker)
       )
-    } catch {
-      throw error
-    }
+    )
   }
-  await ctx.replyWithSticker(sticker)
-  await ctx.reply(`Стикер добавлен в набор: t.me/addstickers/${name}`)
+  await kv.unlink(/** @type any */ ctx.match)
+  await ctx.reply(`Стикеры добавлены в набор: t.me/addstickers/${name}`)
 })
