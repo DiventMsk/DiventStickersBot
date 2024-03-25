@@ -16,24 +16,30 @@ const safe = bot.errorBoundary(async ({ error, ctx }) => {
 const privateChat = safe.chatType('private')
 
 privateChat.command('start', async ctx => {
+  console.debug(ctx.match)
   const images = await kv.lrange(ctx.match, 0, -1)
   const name = `sitckers_for_${ctx.chat.id}_by_${ctx.me.username}`
   const stickers = images.map(sticker => ({ sticker, emoji_list: ['✨'] }))
   try {
-    await ctx.api.createNewStickerSet(
-      ctx.chat.id,
-      name,
-      'Stickers by @DiventDigital',
-      stickers,
-      'static'
+    console.debug(
+      await ctx.api.createNewStickerSet(
+        ctx.chat.id,
+        name,
+        'Stickers by @DiventDigital',
+        stickers,
+        'static'
+      )
     )
   } catch {
-    await Promise.all(
-      stickers.map(sticker =>
-        ctx.api.addStickerToSet(ctx.chat.id, name, sticker)
+    console.debug(
+      await Promise.all(
+        stickers.map(sticker =>
+          ctx.api.addStickerToSet(ctx.chat.id, name, sticker)
+        )
       )
     )
   }
   await kv.unlink(/** @type any */ ctx.match)
   await ctx.reply(`Стикеры добавлены в набор: t.me/addstickers/${name}`)
+  console.debug(name, '+', stickers.length)
 })

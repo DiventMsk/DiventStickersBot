@@ -8,5 +8,7 @@ const { DEFAULT_USER_ID } = process.env,
 
 export const POST = async req => {
   const sticker = new InputFile(req.body, 'sticker.webp')
-  return Response.json(await bot.api.uploadStickerFile(user, 'static', sticker))
+  const result = await bot.api.uploadStickerFile(user, 'static', sticker)
+  console.debug(result)
+  return Response.json(result)
 }
