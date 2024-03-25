@@ -1,7 +1,7 @@
 Run script by:
 
 ```shell
-node . PS.webp
+node . public/Logo.webp
 ```
 
 or

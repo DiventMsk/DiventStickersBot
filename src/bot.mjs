@@ -5,6 +5,7 @@ export const {
   TELEGRAM_BOT_TOKEN: token,
   TELEGRAM_SECRET_TOKEN: secretToken = String(token).split(':').pop(),
   DEFAULT_STICKER_URL: sticker,
+  STICKERS_SET_PREFIX: prefix,
 } = process.env
 
 export const bot = new Bot(token)
@@ -19,7 +20,7 @@ const privateChat = safe.chatType('private')
 privateChat.command('start', async ctx => {
   console.debug(ctx.match)
   const images = await kv.lrange(ctx.match, 0, -1)
-  const name = `sitckers_for_${ctx.chat.id}_by_${ctx.me.username}`
+  const name = `${prefix}_${ctx.chat.id}_by_${ctx.me.username}`
   const stickers = images.map(sticker => ({ sticker, emoji_list: ['✨'] }))
   try {
     console.debug(
