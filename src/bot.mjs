@@ -4,6 +4,7 @@ import { kv } from '@vercel/kv'
 export const {
   TELEGRAM_BOT_TOKEN: token,
   TELEGRAM_SECRET_TOKEN: secretToken = String(token).split(':').pop(),
+  DEFAULT_STICKER_URL: sticker,
 } = process.env
 
 export const bot = new Bot(token)
@@ -26,7 +27,7 @@ privateChat.command('start', async ctx => {
         ctx.chat.id,
         name,
         'Stickers by @DiventDigital',
-        stickers,
+        [{ sticker, emoji_list: ['✨'] }, ...stickers],
         'static'
       )
     )

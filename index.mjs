@@ -14,15 +14,17 @@ const api = {
 
 const images = await Promise.all(
   input.map(async path => {
-    const stream = createReadStream(path)
-    const body = ReadableStream.from(stream.iterator())
-    const response = await fetch(api.image, {
-      method: 'POST',
-      duplex: 'half',
-      body,
-    })
-    const { file_id } = await response.json()
-    return file_id
+    try {
+      const stream = createReadStream(path)
+      const body = ReadableStream.from(stream.iterator())
+      const response = await fetch(api.image, {
+        method: 'POST',
+        duplex: 'half',
+        body,
+      })
+      const { file_id } = await response.json()
+      return file_id
+    } catch {}
   })
 )
 
