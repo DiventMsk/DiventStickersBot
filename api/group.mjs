@@ -10,6 +10,6 @@ export const POST = async req => {
   const url = new URL(bot.botInfo.username, 'https://t.me')
   url.searchParams.set('start', id)
   await kv.lpush(id, ...images)
-  console.debug(url)
+  console.debug(url.href)
   return Response.json({ url })
 }
