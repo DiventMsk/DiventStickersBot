@@ -1,5 +1,5 @@
 import { InputFile } from 'grammy'
-import { StickersBot } from '../../../src/bots.mjs'
+import { StickersBot } from '../../../src/stickers.mjs'
 
 export const config = { runtime: 'edge' }
 

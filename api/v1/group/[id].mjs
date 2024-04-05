@@ -1,5 +1,5 @@
 import { kv } from '@vercel/kv'
-import { StickersBot } from '../../../src/bots.mjs'
+import { StickersBot } from '../../../src/stickers.mjs'
 
 export const config = { runtime: 'edge' }
 

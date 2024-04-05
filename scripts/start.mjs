@@ -1,4 +1,4 @@
-import { bot } from '../src/bot.mjs'
+import { bot } from '../src/configurator.mjs'
 
 // Prevent error throw
 bot.catch(console.error)

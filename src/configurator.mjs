@@ -8,8 +8,14 @@ export const {
 export const bot = new Bot(token)
 
 const safe = bot.errorBoundary(async ({ error, ctx }) => {
-  await ctx.reply('Не удалось добавить стикер')
+  await ctx.reply('Произошла ошибка')
   console.error(error)
 })
 
 const privateChat = safe.chatType('private')
+
+privateChat.command('start', ctx =>
+  ctx.reply(
+    'Добро пожаловать в конфигурационного бота, для продолжения, выберите необходимый пункт в меню'
+  )
+)
