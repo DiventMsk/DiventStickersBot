@@ -11,6 +11,7 @@ export const POST = async req => {
   const url = new URL(bot.botInfo.username, 'https://t.me')
   url.searchParams.set('start', id)
   await kv.lpush(id, ...images)
+  await kv.expire(id, 60 * 60)
   console.debug(url.href)
   return Response.json({ url })
 }
