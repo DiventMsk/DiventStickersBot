@@ -9,10 +9,10 @@ export class StickersBot extends Bot {
     super(token, config)
     this.prefix = prefix
     this.sticker = sticker
-    const safe = this.errorBoundary(this.errorBoundaryMiddleware)
+    const safe = this.errorBoundary(this.errorBoundaryMiddleware.bind(this))
     const privateChat = safe.chatType('private')
-    privateChat.command('start', this.startCommandMiddleware)
-    privateChat.callbackQuery('help', this.helpQueryMiddleware)
+    privateChat.command('start', this.startCommandMiddleware.bind(this))
+    privateChat.callbackQuery('help', this.helpQueryMiddleware.bind(this))
   }
 
   get secretToken() {
