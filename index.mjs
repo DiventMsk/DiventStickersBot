@@ -5,7 +5,7 @@ import { createReadStream } from 'node:fs'
 
 const { input = [] } = meow({ importMeta: import.meta })
 
-const { API_URL = 'https://divent-stickers-bot.vercel.app/' } = process.env
+const { API_URL = 'https://local-3000.ponomarevlad.ru/' } = process.env
 
 const api = {
   image: new URL('api/image', API_URL),

@@ -21,15 +21,18 @@ privateChat.command('start', async ctx => {
   console.debug(ctx.match)
   const images = await kv.lrange(ctx.match, 0, -1)
   const name = `${prefix}_${ctx.chat.id}_by_${ctx.me.username}`
-  const stickers = images.map(sticker => ({ sticker, emoji_list: ['✨'] }))
+  const stickers = images.map(sticker => ({
+    emoji_list: ['✨'],
+    format: 'static',
+    sticker,
+  }))
   try {
     console.debug(
       await ctx.api.createNewStickerSet(
         ctx.chat.id,
         name,
         'Stickers by @DiventDigital',
-        [{ sticker, emoji_list: ['✨'] }, ...stickers],
-        'static'
+        [{ sticker, emoji_list: ['✨'], format: 'static' }, ...stickers]
       )
     )
   } catch {
