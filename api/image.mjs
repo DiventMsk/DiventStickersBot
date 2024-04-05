@@ -3,12 +3,13 @@ import { InputFile } from 'grammy'
 
 export const config = { runtime: 'edge' }
 
-const { DEFAULT_USER_ID } = process.env,
-  user = parseInt(DEFAULT_USER_ID)
+const { DEFAULT_CHAT_ID } = process.env,
+  chat = parseInt(DEFAULT_CHAT_ID),
+  filename = 'sticker.webp'
 
 export const POST = async req => {
-  const sticker = new InputFile(req.body, 'sticker.webp')
-  const result = await bot.api.uploadStickerFile(user, 'static', sticker)
-  console.debug(result)
-  return Response.json(result)
+  const file = new InputFile(req.body, filename)
+  const { sticker } = await bot.api.sendSticker(chat, file)
+  console.debug(JSON.stringify(sticker))
+  return Response.json(sticker)
 }
