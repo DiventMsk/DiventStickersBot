@@ -44,8 +44,8 @@ await initBot(bot, secretToken)
 const bots = await get('bots')
 
 await Promise.allSettled(
-  Object.entries(bots).map(([theme, { token }]) => {
-    const bot = new StickersBot(token)
+  Object.entries(bots).map(([theme, { token, ...config } = {}]) => {
+    const bot = new StickersBot(token, config)
     return initBot(bot, bot.secretToken, `api/v1/webhook/${theme}`)
   })
 )

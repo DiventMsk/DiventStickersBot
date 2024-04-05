@@ -5,7 +5,7 @@ import { Bot, InlineKeyboard } from 'grammy'
 export class StickersBot extends Bot {
   stickerDefaults = { format: 'static', emoji_list: ['✨'] }
 
-  constructor(token, { prefix, sticker, ...config }) {
+  constructor(token, { prefix, sticker, ...config } = {}) {
     super(token, config)
     this.prefix = prefix
     this.sticker = sticker
