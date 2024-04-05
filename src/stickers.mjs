@@ -2,12 +2,13 @@ import { kv } from '@vercel/kv'
 import { get } from '@vercel/edge-config'
 import { Bot, InlineKeyboard } from 'grammy'
 
-export const { DEFAULT_STICKER_URL: sticker, STICKERS_SET_PREFIX: prefix } =
-  process.env
-
 export class StickersBot extends Bot {
-  constructor(token, config) {
+  stickerDefaults = { format: 'static', emoji_list: ['✨'] }
+
+  constructor(token, { prefix, sticker, ...config }) {
     super(token, config)
+    this.prefix = prefix
+    this.sticker = sticker
     const safe = this.errorBoundary(this.errorBoundaryMiddleware)
     const privateChat = safe.chatType('private')
     privateChat.command('start', this.startCommandMiddleware)
@@ -21,8 +22,8 @@ export class StickersBot extends Bot {
   static async fromRequest(req) {
     const bots = await get('bots')
     const { searchParams } = new URL(req.url)
-    const { token } = bots[searchParams.get('id')]
-    return new this(token)
+    const { token, ...config } = bots[searchParams.get('id')]
+    return new this(token, config)
   }
 
   async errorBoundaryMiddleware({ error, ctx }) {
@@ -31,15 +32,16 @@ export class StickersBot extends Bot {
   }
 
   async startCommandMiddleware(ctx) {
-    console.debug(ctx.match)
     if (!ctx.match)
       return ctx.reply(`Добро пожаловать в бота @${ctx.me.username}!`)
+    console.debug(ctx.match)
+    const { prefix = 'for', sticker } = this
     const images = await kv.lrange(ctx.match, 0, -1)
     const name = `${prefix}_${ctx.chat.id}_by_${ctx.me.username}`
     const { href } = new URL(name, 'https://t.me/addstickers/')
+    const defaultSticker = { sticker, ...this.stickerDefaults }
     const stickers = images.map(sticker => ({
-      emoji_list: ['✨'],
-      format: 'static',
+      ...this.stickerDefaults,
       sticker,
     }))
     try {
@@ -48,7 +50,7 @@ export class StickersBot extends Bot {
           ctx.chat.id,
           name,
           'Stickers by @DiventDigital',
-          [{ sticker, emoji_list: ['✨'], format: 'static' }, ...stickers]
+          [sticker ? defaultSticker : null, ...stickers].filter(Boolean)
         )
       )
       await ctx
