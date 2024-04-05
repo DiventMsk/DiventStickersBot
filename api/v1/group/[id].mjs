@@ -1,9 +1,10 @@
-import { bot } from '../src/bot.mjs'
 import { kv } from '@vercel/kv'
+import { StickersBot } from '../../../src/bots.mjs'
 
 export const config = { runtime: 'edge' }
 
 export const POST = async req => {
+  const bot = await StickersBot.fromRequest(req)
   const [images = []] = await Promise.all([req.json(), bot.init()])
   console.debug(images)
   if (!images.length) throw new Error('Empty images')

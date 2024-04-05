@@ -16,6 +16,7 @@
     "test": "node --env-file=.env . public/Logo.webp"
   },
   "dependencies": {
+    "@vercel/edge-config": "^1.1.0",
     "@vercel/kv": "^1.0.1",
     "grammy": "^1.22.4",
     "meow": "^13.2.0",

@@ -1,4 +1,5 @@
-import { bot, secretToken } from '../src/bot.mjs'
+import { get } from '@vercel/edge-config'
+import { StickersBot } from '../src/bots.mjs'
 import { getURL } from 'vercel-grammy'
 
 const { VERCEL_ENV } = process.env
@@ -9,24 +10,33 @@ const allowedEnvs = [
   // "preview"
 ]
 
-// Check bot
-await bot.init()
+const bots = await get('bots')
 
-// Exit in case of unsuitable environments
-if (!allowedEnvs.includes(VERCEL_ENV)) process.exit()
+await Promise.allSettled(
+  Object.values(bots).map(async ({ token }) => {
+    const bot = new StickersBot(token)
+    const { secretToken } = bot
 
-// Webhook URL generation
-const url = getURL({ path: 'api/update' })
+    // Check bot
+    await bot.init()
 
-// Webhook setup options
-const options = { secret_token: secretToken }
+    // Exit in case of unsuitable environments
+    if (!allowedEnvs.includes(VERCEL_ENV)) process.exit()
 
-// Installing a webhook
-if (await bot.api.setWebhook(url, options)) {
-  // Checking the webhook installation
-  const { url } = await bot.api.getWebhookInfo()
+    // Webhook URL generation
+    const url = getURL({ path: 'api/update' })
 
-  console.info('Webhook set to URL:', url)
-  console.info('Secret token:', secretToken)
-  console.info('Info:', bot.botInfo)
-}
+    // Webhook setup options
+    const options = { secret_token: secretToken }
+
+    // Installing a webhook
+    if (await bot.api.setWebhook(url, options)) {
+      // Checking the webhook installation
+      const { url } = await bot.api.getWebhookInfo()
+
+      console.info('Webhook set to URL:', url)
+      console.info('Secret token:', secretToken)
+      console.info('Info:', bot.botInfo)
+    }
+  })
+)
