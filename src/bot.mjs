@@ -19,6 +19,8 @@ const privateChat = safe.chatType('private')
 
 privateChat.command('start', async ctx => {
   console.debug(ctx.match)
+  if (!ctx.match)
+    return ctx.reply(`Добро пожаловать в бота @${ctx.me.username}!`)
   const images = await kv.lrange(ctx.match, 0, -1)
   const name = `${prefix}_${ctx.chat.id}_by_${ctx.me.username}`
   const { href } = new URL(name, 'https://t.me/addstickers/')
