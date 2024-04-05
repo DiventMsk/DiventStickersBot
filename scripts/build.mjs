@@ -24,7 +24,7 @@ await Promise.allSettled(
     if (!allowedEnvs.includes(VERCEL_ENV)) process.exit()
 
     // Webhook URL generation
-    const url = getURL({ path: `api/webhook/${theme}` })
+    const url = getURL({ path: `api/v1/webhook/${theme}` })
 
     // Webhook setup options
     const options = { secret_token: secretToken }
