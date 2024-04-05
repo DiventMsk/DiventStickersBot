@@ -1,4 +1,4 @@
-import { Bot } from 'grammy'
+import { Bot, InlineKeyboard } from 'grammy'
 import { kv } from '@vercel/kv'
 
 export const {
@@ -21,6 +21,7 @@ privateChat.command('start', async ctx => {
   console.debug(ctx.match)
   const images = await kv.lrange(ctx.match, 0, -1)
   const name = `${prefix}_${ctx.chat.id}_by_${ctx.me.username}`
+  const { href } = new URL(name, 'https://t.me/addstickers/')
   const stickers = images.map(sticker => ({
     emoji_list: ['✨'],
     format: 'static',
@@ -35,6 +36,9 @@ privateChat.command('start', async ctx => {
         [{ sticker, emoji_list: ['✨'], format: 'static' }, ...stickers]
       )
     )
+    await ctx
+      .reply(`Добро пожаловать в бота @${ctx.me.username}!`)
+      .catch(console.error)
   } catch {
     console.debug(
       await Promise.all(
@@ -45,6 +49,19 @@ privateChat.command('start', async ctx => {
     )
   }
   await kv.unlink(/** @type any */ ctx.match)
-  await ctx.reply(`Стикеры добавлены в набор: t.me/addstickers/${name}`)
+  await ctx.reply(`${stickers.length} стикера загружены в ваш набор`, {
+    reply_markup: new InlineKeyboard()
+      .url('Добавить набор', href)
+      .text('Нужна помощь ?', 'help')
+      .toFlowed(1),
+  })
   console.debug(name, '+', stickers.length)
 })
+
+privateChat.callbackQuery('help', ctx =>
+  ctx.reply(`
+Стикеры могут появляться в наборе с задержкой, если вы не видите новых изображений, попробуйте перезапустить приложение.
+
+Если вы хотите удалить стикеры или весь набор, для этого перейдите в бота @Stickers и выберите соответствующий пункт в меню.
+`)
+)
