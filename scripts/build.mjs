@@ -13,7 +13,7 @@ const allowedEnvs = [
 const bots = await get('bots')
 
 await Promise.allSettled(
-  Object.values(bots).map(async ({ token }) => {
+  Object.entries(bots).map(async ([theme, { token }]) => {
     const bot = new StickersBot(token)
     const { secretToken } = bot
 
@@ -24,7 +24,7 @@ await Promise.allSettled(
     if (!allowedEnvs.includes(VERCEL_ENV)) process.exit()
 
     // Webhook URL generation
-    const url = getURL({ path: 'api/update' })
+    const url = getURL({ path: `api/webhook/${theme}` })
 
     // Webhook setup options
     const options = { secret_token: secretToken }
