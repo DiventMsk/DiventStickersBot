@@ -20,9 +20,8 @@ export class StickersBot extends Bot {
   }
 
   static async fromRequest(req) {
-    const bots = await get('bots')
     const { searchParams } = new URL(req.url)
-    const { token, ...config } = bots[searchParams.get('id')]
+    const { token, ...config } = await get(searchParams.get('id'))
     return new this(token, config)
   }
 

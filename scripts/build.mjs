@@ -1,4 +1,4 @@
-import { get } from '@vercel/edge-config'
+import { getAll } from '@vercel/edge-config'
 import { StickersBot } from '../src/stickers.mjs'
 import { bot, secretToken } from '../src/configurator.mjs'
 import { getURL } from 'vercel-grammy'
@@ -41,7 +41,7 @@ async function initBot(
 
 await initBot(bot, secretToken)
 
-const bots = await get('bots')
+const bots = await getAll()
 
 await Promise.allSettled(
   Object.entries(bots).map(([theme, { token, ...config } = {}]) => {
