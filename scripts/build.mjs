@@ -1,51 +1,33 @@
-import { getAll } from '@vercel/edge-config'
-import { StickersBot } from '../src/stickers.mjs'
-import { bot, secretToken } from '../src/configurator.mjs'
+import { Bot } from 'grammy'
+import { bots } from '../src/db.mjs'
 import { getURL } from 'vercel-grammy'
+import { secretTokenFromToken } from '../src/utils/telegram-bot.mjs'
+import { bot, secretToken as secret_token } from '../src/organizer/index.mjs'
 
-const { VERCEL_ENV } = process.env
-
-// List of allowed environments
 const allowedEnvs = [
   'production',
   // "preview"
 ]
 
-async function initBot(
-  bot,
-  secret_token,
-  path = 'api/v1/webhook/configurator'
-) {
-  // Check bot
-  await bot.init()
+if (!allowedEnvs.includes(process.env.VERCEL_ENV)) process.exit()
 
-  // Exit in case of unsuitable environments
-  if (!allowedEnvs.includes(VERCEL_ENV)) process.exit()
+await bot.init()
 
-  // Webhook URL generation
-  const url = getURL({ path })
+const allBots = await bots.find().toArray()
 
-  // Webhook setup options
-  const options = { secret_token }
+const url = getURL({ path: 'api/v1/webhook/organizer' })
 
-  // Installing a webhook
-  if (await bot.api.setWebhook(url, options)) {
-    // Checking the webhook installation
-    const { url } = await bot.api.getWebhookInfo()
-
-    console.info('Webhook set to URL:', url)
-    console.info('Secret token:', secretToken)
-    console.info('Info:', bot.botInfo)
-  }
+if (await bot.api.setWebhook(url, { secret_token })) {
+  const { url } = await bot.api.getWebhookInfo()
+  console.info('Webhook set to URL:', url)
+  console.info('Secret token:', secret_token)
+  console.info('Info:', bot.botInfo)
 }
 
-await initBot(bot, secretToken)
-
-const bots = await getAll()
-
 await Promise.allSettled(
-  Object.entries(bots).map(([theme, { token, ...config } = {}]) => {
-    const bot = new StickersBot(token, config)
-    return initBot(bot, bot.secretToken, `api/v1/webhook/${theme}`)
-  })
+  allBots.map(({ id, token }) =>
+    new Bot(token).api.setWebhook(getURL({ path: `api/v1/webhook/${id}` }), {
+      secret_token: secretTokenFromToken(token),
+    })
+  )
 )

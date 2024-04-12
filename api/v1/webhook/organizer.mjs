@@ -1,4 +1,4 @@
-import { bot, secretToken } from '../../../src/configurator.mjs'
+import { bot, secretToken } from '../../../src/organizer/index.mjs'
 import { webhookCallback } from 'grammy'
 
 export const config = { runtime: 'edge' }
