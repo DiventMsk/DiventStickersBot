@@ -11,7 +11,8 @@ export async function callbackQueryMiddleware(ctx) {
         reply_markup: new InlineKeyboardWithJSON()
           .json('Скачать список участников', { id, action: 'export' })
           .json('Выбрать стикер по умолчанию', { id, action: 'sticker' })
-          .json('Удалить бота', { id, action: 'delete' }),
+          .json('Удалить бота', { id, action: 'delete' })
+          .toFlowed(1),
       })
     case 'delete':
       if (!bot) return ctx.reply('Указанный бот не найден')
