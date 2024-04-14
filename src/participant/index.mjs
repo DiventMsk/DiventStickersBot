@@ -45,12 +45,13 @@ privateChats.command('start', async (ctx, next) => {
   })
 })
 
-privateChats.callbackQuery('help', ctx =>
-  ctx.reply(`
+privateChats.callbackQuery('help', async ctx => {
+  await ctx.reply(`
 Стикеры могут появляться в наборе с задержкой, если вы не видите новых изображений, попробуйте перезапустить приложение.
 Если вы хотите удалить стикеры или весь набор, для этого перейдите в бота @Stickers и выберите соответствующий пункт в меню.
 `)
-)
+  return ctx.answerCallbackQuery()
+})
 
 privateChats.on('message:text', ctx =>
   ctx.reply(`Добро пожаловать в бота @${ctx.me.username}!`)
