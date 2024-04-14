@@ -59,8 +59,8 @@ privateChats.on('message:text', ctx =>
 
 export async function getBotFromRequest(req) {
   const { searchParams } = new URL(req.url)
-  const id = parseInt(searchParams.get('id'))
-  const { token } = await bots.findOne({ id })
+  const client = searchParams.get('id').trim()
+  const { token } = await bots.findOne({ client })
   const bot = new Bot(token)
   bot.use(composer)
   await bot.init()
