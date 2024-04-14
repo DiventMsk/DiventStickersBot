@@ -26,7 +26,7 @@ privateChats.command('start', async (ctx, next) => {
     .toLocaleString('ru', { dateStyle: 'short' })
     .replaceAll('.', '_')
   const title = 'Stickers by @DiventDigital'
-  const name = `${date}_for_${ctx.chat.id}_by_${ctx.me.username}`
+  const name = `at_${date}_for_${ctx.chat.id}_by_${ctx.me.username}`
   const { href } = new URL(name, 'https://t.me/addstickers/')
   const session = await sessions.findOneAndDelete({ id })
   const stickers = session.stickers.map(sticker => ({ ...defaults, sticker }))
