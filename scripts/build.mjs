@@ -1,8 +1,12 @@
+import {
+  bot,
+  commands,
+  secretToken as secret_token,
+} from '../src/organizer/index.mjs'
 import { Bot } from 'grammy'
 import { bots } from '../src/db.mjs'
 import { getURL } from 'vercel-grammy'
 import { secretTokenFromToken } from '../src/utils/telegram-bot.mjs'
-import { bot, secretToken as secret_token } from '../src/organizer/index.mjs'
 
 const allowedEnvs = [
   'production',
@@ -22,6 +26,7 @@ if (await bot.api.setWebhook(url, { secret_token })) {
   console.info('Webhook set to URL:', url)
   console.info('Secret token:', secret_token)
   console.info('Info:', bot.botInfo)
+  await commands.setCommands(bot).catch(console.error)
 }
 
 await Promise.allSettled(

@@ -4,6 +4,8 @@ import { tokenQuestion } from './questions.mjs'
 import { callbackQueryMiddleware } from './queries.mjs'
 import { secretTokenFromToken } from '../utils/telegram-bot.mjs'
 
+export { commands }
+
 export const {
   TELEGRAM_BOT_TOKEN: token,
   TELEGRAM_SECRET_TOKEN: secretToken = secretTokenFromToken(token),
