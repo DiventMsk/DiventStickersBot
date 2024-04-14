@@ -5,12 +5,12 @@ import { createReadStream } from 'node:fs'
 
 const { input = [] } = meow({ importMeta: import.meta })
 
-const { API_URL = 'https://divent-stickers-bot.vercel.app/', THEME = 'test' } =
+const { API_URL = 'https://divent-stickers-bot.vercel.app/', ID = 12345 } =
   process.env
 
 const api = {
-  image: new URL(`api/v1/image/${THEME}`, API_URL),
-  group: new URL(`api/v1/group/${THEME}`, API_URL),
+  image: new URL(`api/v1/image/${ID}`, API_URL),
+  group: new URL(`api/v1/group/${ID}`, API_URL),
 }
 
 const images = await Promise.all(
