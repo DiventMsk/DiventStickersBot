@@ -30,10 +30,13 @@ privateChats.command('start', async (ctx, next) => {
   const { href } = new URL(name, 'https://t.me/addstickers/')
   const session = await sessions.findOneAndDelete({ id })
   const stickers = session.stickers.map(sticker => ({ ...defaults, sticker }))
-  if (await ctx.api.getStickerSet(name))
+  try {
+    await ctx.api.getStickerSet(name)
     for (const sticker of stickers)
       await ctx.api.addStickerToSet(ctx.chat.id, name, sticker)
-  else await ctx.api.createNewStickerSet(ctx.chat.id, name, title, stickers)
+  } catch {
+    await ctx.api.createNewStickerSet(ctx.chat.id, name, title, stickers)
+  }
   await ctx.reply(`Стикеров загружено в ваш набор: ${stickers.length}`, {
     reply_markup: new InlineKeyboard()
       .url('Добавить набор', href)
