@@ -19,7 +19,8 @@ export async function callbackQueryMiddleware(ctx) {
       const { deletedCount: ok } = await bots.deleteOne({ id })
       return ctx.reply(ok ? 'Бот успешно удален' : 'Не удалось удалить бота')
   }
-  return ctx.answerCallbackQuery('Действие не поддерживается', {
+  return ctx.answerCallbackQuery({
+    text: 'Действие не поддерживается',
     show_alert: true,
   })
 }
