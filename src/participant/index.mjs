@@ -20,15 +20,15 @@ privateChats.use((ctx, next) =>
 )
 
 privateChats.command('start', async (ctx, next) => {
-  const _id = ctx.match.trim()
-  if (!_id) return next()
+  const id = ctx.match.trim()
+  if (!id) return next()
   const date = new Date()
     .toLocaleString('ru', { dateStyle: 'short' })
     .replaceAll('.', '_')
   const title = 'Stickers by @DiventDigital'
   const name = `${date}_for_${ctx.chat.id}_by_${ctx.me.username}`
   const { href } = new URL(name, 'https://t.me/addstickers/')
-  const session = await sessions.findOneAndDelete({ _id })
+  const session = await sessions.findOneAndDelete({ id })
   const stickers = session.stickers.map(sticker => ({ ...defaults, sticker }))
   if (await ctx.api.getStickerSet(name))
     for (const sticker of stickers)
