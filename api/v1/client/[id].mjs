@@ -10,7 +10,7 @@ export default async req => {
     {
       $set: {
         client,
-        date: Date.now(),
+        date: new Date(),
       },
     },
     { upsert: true }
