@@ -28,10 +28,10 @@ RUN npm ci --include=dev
 COPY --link . .
 
 # Build application
-RUN npm run build
+#RUN npm run build
 
 # Remove development dependencies
-RUN npm prune --omit=dev
+#RUN npm prune --omit=dev
 
 
 # Final stage for app image
@@ -42,4 +42,4 @@ COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-CMD [ "node", "./index.mjs" ]
+CMD [ "micro" ]
