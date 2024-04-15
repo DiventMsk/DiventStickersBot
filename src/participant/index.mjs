@@ -64,6 +64,10 @@ privateChats.command('start', async (ctx, next) => {
     )
     taskPromise = Promise.allSettled(
       images.map(async target_image => {
+        console.debug({
+          target_image,
+          swap_image,
+        })
         const {
           data: { task_id },
         } = await fetch(api.async, {
