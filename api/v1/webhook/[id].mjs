@@ -1,15 +1,15 @@
 import { secretTokenFromToken } from '../../../src/utils/telegram-bot.mjs'
 import { getBotFromID } from '../../../src/participant/index.mjs'
-import { webhookCallback } from 'grammy'
+import { webhookStream } from 'vercel-grammy'
 
 export const config = { runtime: 'edge' }
 
 export const POST = async req => {
   try {
     const bot = await getBotFromID(req)
-    return webhookCallback(bot, 'std/http', {
+    return webhookStream(bot, {
       secretToken: secretTokenFromToken(bot.token),
-      timeoutMilliseconds: 24_000,
+      timeoutMilliseconds: 59_000,
     })(req)
   } catch (e) {
     console.error(e)

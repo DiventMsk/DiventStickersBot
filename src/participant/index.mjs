@@ -44,7 +44,7 @@ privateChats.command('start', async (ctx, next) => {
   let taskPromise
   const id = ctx.match.trim()
   if (!id) return next()
-  const signal = AbortSignal.timeout(20_000)
+  const signal = AbortSignal.timeout(58_000)
   const date = new Date()
     .toLocaleString('ru', { dateStyle: 'short' })
     .replaceAll('.', '_')
