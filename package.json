@@ -23,7 +23,7 @@
     "@vercel/kv": "^1.0.1",
     "grammy": "^1.22.4",
     "meow": "^13.2.0",
-    "mime": "^4.0.1",
+    "mime": "^3.0.0",
     "mongo-realm-web-wrapper": "^0.0.2",
     "vercel-grammy": "^1.0.0"
   },
