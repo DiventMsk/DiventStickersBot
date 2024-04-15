@@ -1,0 +1,33 @@
+{
+  "installCommand": "npm ci --omit=dev",
+  "rewrites": [
+    {
+      "source": "/api/download/:bot_id/:file_id/:mime_base_type/:mime_sub_type/(.*)",
+      "destination": "/api/download"
+    },
+    {
+      "source": "/api/download/:bot_id/:file_id/:mime_base_type/:mime_sub_type",
+      "destination": "/api/download"
+    },
+    {
+      "source": "/api/download/:bot_id/:file_id/(.*)",
+      "destination": "/api/download"
+    },
+    {
+      "source": "/api/download/:bot_id/:file_id",
+      "destination": "/api/download"
+    },
+    {
+      "source": "/api/download/:bot_id/(.*)",
+      "destination": "/api/download"
+    },
+    {
+      "source": "/api/download/:bot_id",
+      "destination": "/api/download"
+    },
+    {
+      "source": "/api/download/(.*)",
+      "destination": "/api/download"
+    }
+  ]
+}

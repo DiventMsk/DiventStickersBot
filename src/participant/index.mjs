@@ -60,17 +60,17 @@ privateChats.on('message:text', ctx =>
 export async function getBotFromClient(req) {
   const { searchParams } = new URL(req.url)
   const client = searchParams.get('id').trim()
-  const { token } = await bots.findOne({ client })
-  const bot = new Bot(token)
-  bot.use(composer)
-  await bot.init()
-  return bot
+  return getBot({ client })
 }
 
 export async function getBotFromID(req) {
   const { searchParams } = new URL(req.url)
   const id = parseInt(searchParams.get('id').trim())
-  const { token } = await bots.findOne({ id })
+  return getBot({ id })
+}
+
+export async function getBot(filter = {}) {
+  const { token } = await bots.findOne(filter)
   const bot = new Bot(token)
   bot.use(composer)
   await bot.init()

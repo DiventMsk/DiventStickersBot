@@ -7,3 +7,14 @@ export class InlineKeyboardWithJSON extends InlineKeyboard {
     return this.text(text, JSON.stringify(data))
   }
 }
+
+export const getHeaders = (
+  name,
+  mime = 'application/octet-stream',
+  context = 'attachment'
+) => ({
+  'Content-Type': mime,
+  'Content-Disposition': [context, name ? `filename="${name}"` : undefined]
+    .filter(Boolean)
+    .join('; '),
+})
