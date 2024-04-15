@@ -69,7 +69,7 @@ export async function getBotFromClient(req) {
 
 export async function getBotFromID(req) {
   const { searchParams } = new URL(req.url)
-  const id = searchParams.get('id').trim()
+  const id = parseInt(searchParams.get('id').trim())
   const { token } = await bots.findOne({ id })
   const bot = new Bot(token)
   bot.use(composer)
