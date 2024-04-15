@@ -55,9 +55,9 @@ privateChats.command('start', async (ctx, next) => {
     await ctx.api.createNewStickerSet(ctx.chat.id, name, title, stickers) */
   const swap_image = getFileURL({
     bot_id: ctx.me.id,
-    file_id: stickers.at(0),
     mime_type: 'image/webp',
     file_name: 'sticker.webp',
+    file_id: session.stickers.at(0),
   })
   const array = new Array(1).fill(0)
   const offset = session.sex === 'male' ? 1 : 11
