@@ -7,7 +7,7 @@ import { bots, participants as collection, sessions } from '../db.mjs'
 
 const { GOAPI_KEY: key } = process.env
 
-const defaultTimeout = 1000,
+const defaultTimeout = 3000,
   minTimeout = defaultTimeout,
   maxTimeout = defaultTimeout
 
@@ -120,8 +120,8 @@ privateChats.command('start', async (ctx, next) => {
   })
   if (taskPromise) {
     const results = await taskPromise
-    await ctx.reply(`Добавлено генеративных стикеров: ${results.length}`)
     console.debug(results)
+    await ctx.reply(`Добавлено генеративных стикеров: ${results.length}`)
   }
 })
 
