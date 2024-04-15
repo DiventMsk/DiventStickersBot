@@ -48,7 +48,9 @@ privateChats.command('start', async (ctx, next) => {
   try {
     await ctx.api.getStickerSet(name)
     for (const sticker of stickers)
-      await ctx.api.addStickerToSet(ctx.chat.id, name, sticker)
+      await ctx.api
+        .addStickerToSet(ctx.chat.id, name, sticker)
+        .catch(console.error)
   } catch {
     await ctx.api.createNewStickerSet(ctx.chat.id, name, title, stickers)
     const swap_image = getFileURL({
