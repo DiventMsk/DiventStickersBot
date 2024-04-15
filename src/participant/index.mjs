@@ -1,3 +1,4 @@
+import 'grammy-debug-edge'
 import pRetry from 'p-retry'
 import { getURL } from 'vercel-grammy'
 import { getFileURL } from '../utils/telegram-bot.mjs'

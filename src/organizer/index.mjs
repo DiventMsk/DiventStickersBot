@@ -1,3 +1,4 @@
+import 'grammy-debug-edge'
 import { Bot } from 'grammy'
 import { commands } from './commands.mjs'
 import { tokenQuestion } from './questions.mjs'
