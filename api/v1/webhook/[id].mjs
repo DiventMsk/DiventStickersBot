@@ -9,7 +9,7 @@ export const POST = async req => {
     const bot = await getBotFromID(req)
     return webhookStream(bot, {
       secretToken: secretTokenFromToken(bot.token),
-      timeoutMilliseconds: 59_000,
+      timeoutMilliseconds: 58_000,
     })(req)
   } catch (e) {
     console.error(e)
