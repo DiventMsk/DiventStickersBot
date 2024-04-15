@@ -66,13 +66,11 @@ privateChats.command('start', async (ctx, next) => {
   )
   taskPromise = Promise.allSettled(
     images.map(async target_image => {
-      console.debug({
+      console.debug('body', {
         target_image,
         swap_image,
       })
-      const {
-        data: { task_id },
-      } = await fetch(api.async, {
+      const asyncResult = await fetch(api.async, {
         body: JSON.stringify({
           result_type: 'url',
           target_image,
@@ -80,12 +78,18 @@ privateChats.command('start', async (ctx, next) => {
         }),
         ...init,
       }).then(res => res.json())
+      console.debug('asyncResult', asyncResult)
       const {
-        data: { image: sticker },
-      } = await fetch(api.fetch, {
+        data: { task_id },
+      } = asyncResult
+      const fetchResult = await fetch(api.fetch, {
         body: JSON.stringify({ task_id }),
         ...init,
       }).then(res => res.json())
+      console.debug('fetchResult', fetchResult)
+      const {
+        data: { image: sticker },
+      } = fetchResult
       await ctx.api.addStickerToSet(ctx.chat.id, name, {
         ...defaults,
         sticker,
