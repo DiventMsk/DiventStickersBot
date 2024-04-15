@@ -57,10 +57,20 @@ privateChats.on('message:text', ctx =>
   ctx.reply(`Добро пожаловать в бота @${ctx.me.username}!`)
 )
 
-export async function getBotFromRequest(req) {
+export async function getBotFromClient(req) {
   const { searchParams } = new URL(req.url)
   const client = searchParams.get('id').trim()
   const { token } = await bots.findOne({ client })
+  const bot = new Bot(token)
+  bot.use(composer)
+  await bot.init()
+  return bot
+}
+
+export async function getBotFromID(req) {
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id').trim()
+  const { token } = await bots.findOne({ id })
   const bot = new Bot(token)
   bot.use(composer)
   await bot.init()

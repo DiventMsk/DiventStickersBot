@@ -1,10 +1,10 @@
 import { sessions } from '../../../src/db.mjs'
-import { getBotFromRequest } from '../../../src/participant/index.mjs'
+import { getBotFromClient } from '../../../src/participant/index.mjs'
 
 export const config = { runtime: 'edge' }
 
 export const POST = async req => {
-  const bot = await getBotFromRequest(req)
+  const bot = await getBotFromClient(req)
   const { sex, stickers = [] } = await req.json()
   console.debug(sex, stickers)
   if (!stickers.length) throw new Error('Empty images')
