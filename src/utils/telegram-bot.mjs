@@ -21,7 +21,7 @@ export const getHeaders = (
 })
 
 export function getFileURL({ bot_id, file_id, mime_type, file_name } = {}) {
-  let href = getURL({ path: `/api/download/${bot_id}/${file_id}` })
+  let href = getURL({ path: `/api/v1/download/${bot_id}/${file_id}` })
   if (mime_type) ({ href } = new URL(mime_type, href + '/'))
   if (file_name) ({ href } = new URL(file_name, href + '/'))
   return href
