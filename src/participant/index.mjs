@@ -7,6 +7,10 @@ import { bots, participants as collection, sessions } from '../db.mjs'
 
 const { GOAPI_KEY: key } = process.env
 
+const defaultTimeout = 1000,
+  minTimeout = defaultTimeout,
+  maxTimeout = defaultTimeout
+
 const api = {
   async: 'https://api.goapi.xyz/api/face_swap/v1/async',
   fetch: 'https://api.goapi.xyz/api/face_swap/v1/fetch',
@@ -49,63 +53,65 @@ privateChats.command('start', async (ctx, next) => {
   const { href } = new URL(name, 'https://t.me/addstickers/')
   const session = await sessions.findOneAndDelete({ id })
   const stickers = session.stickers.map(sticker => ({ ...defaults, sticker }))
-  /* try {
+  try {
     await ctx.api.getStickerSet(name)
     for (const sticker of stickers)
       await ctx.api
         .addStickerToSet(ctx.chat.id, name, sticker)
         .catch(console.error)
   } catch {
-    await ctx.api.createNewStickerSet(ctx.chat.id, name, title, stickers) */
-  const swap_image = getFileURL({
-    bot_id: ctx.me.id,
-    mime_type: 'image/webp',
-    file_name: 'sticker.webp',
-    file_id: session.stickers.at(0),
-  })
-  const array = new Array(1).fill(0)
-  const offset = session.sex === 'male' ? 1 : 11
-  const images = array.map((_, index) =>
-    getURL({ path: `/images/${index + offset}.png` })
-  )
-  taskPromise = Promise.allSettled(
-    images.map(async target_image => {
-      console.debug('body', {
-        target_image,
-        swap_image,
-      })
-      const asyncResult = await fetch(api.async, {
-        body: JSON.stringify({
-          result_type: 'url',
+    await ctx.api.createNewStickerSet(ctx.chat.id, name, title, stickers)
+    const swap_image = getFileURL({
+      bot_id: ctx.me.id,
+      mime_type: 'image/webp',
+      file_name: 'sticker.webp',
+      file_id: session.stickers.at(0),
+    })
+    const array = new Array(10).fill(0)
+    const offset = session.sex === 'male' ? 1 : 11
+    const images = array.map((_, index) =>
+      getURL({ path: `/images/${index + offset}.png` })
+    )
+    taskPromise = Promise.allSettled(
+      images.map(async target_image => {
+        console.debug('body', {
           target_image,
           swap_image,
-        }),
-        ...init,
-      }).then(res => res.json())
-      console.debug('asyncResult', asyncResult)
-      const {
-        data: { task_id },
-      } = asyncResult
-      const task = () =>
-        fetch(api.fetch, { body: JSON.stringify({ task_id }), ...init })
-          .then(res => res.json())
-          .then(result => {
-            if (processing.includes(result.data.status))
-              throw new Error('processing')
-            return result
-          })
-      const fetchResult = await pRetry(task, { signal })
-      console.debug('fetchResult', fetchResult)
-      const {
-        data: { image: sticker },
-      } = fetchResult
-      await ctx.api.addStickerToSet(ctx.chat.id, name, {
-        ...defaults,
-        sticker,
+        })
+        const asyncResult = await fetch(api.async, {
+          body: JSON.stringify({
+            result_type: 'url',
+            target_image,
+            swap_image,
+          }),
+          ...init,
+        }).then(res => res.json())
+        console.debug('asyncResult', asyncResult)
+        const {
+          data: { task_id },
+        } = asyncResult
+        const fetchResult = await pRetry(
+          () =>
+            fetch(api.fetch, { body: JSON.stringify({ task_id }), ...init })
+              .then(res => res.json())
+              .then(result => {
+                if (processing.includes(result.data.status))
+                  throw new Error('processing')
+                return result
+              }),
+          { signal, minTimeout, maxTimeout }
+        )
+        console.debug('fetchResult', fetchResult)
+        const {
+          data: { image: sticker },
+        } = fetchResult
+        await ctx.api.addStickerToSet(ctx.chat.id, name, {
+          ...defaults,
+          sticker,
+        })
       })
-    })
-  )
-  /* } */
+    )
+  }
   await ctx.reply(`Стикеров загружено в ваш набор: ${stickers.length}`, {
     reply_markup: new InlineKeyboard()
       .url('Добавить набор', href)
