@@ -1,3 +1,4 @@
+import pRetry from 'p-retry'
 import { getURL } from 'vercel-grammy'
 import { getFileURL } from '../utils/telegram-bot.mjs'
 import { MongoDBAdapter } from '@grammyjs/storage-mongodb'
@@ -15,6 +16,8 @@ const init = {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
 }
+
+const processing = ['pending', 'starting', 'processing']
 
 const defaults = { format: 'static', emoji_list: ['✨'] }
 
@@ -37,6 +40,7 @@ privateChats.command('start', async (ctx, next) => {
   let taskPromise
   const id = ctx.match.trim()
   if (!id) return next()
+  const signal = AbortSignal.timeout(20_000)
   const date = new Date()
     .toLocaleString('ru', { dateStyle: 'short' })
     .replaceAll('.', '_')
@@ -82,10 +86,15 @@ privateChats.command('start', async (ctx, next) => {
       const {
         data: { task_id },
       } = asyncResult
-      const fetchResult = await fetch(api.fetch, {
-        body: JSON.stringify({ task_id }),
-        ...init,
-      }).then(res => res.json())
+      const task = () =>
+        fetch(api.fetch, { body: JSON.stringify({ task_id }), ...init })
+          .then(res => res.json())
+          .then(result =>
+            processing.includes(result.data.status)
+              ? throw new Error('processing')
+              : result
+          )
+      const fetchResult = await pRetry(task, { signal })
       console.debug('fetchResult', fetchResult)
       const {
         data: { image: sticker },
