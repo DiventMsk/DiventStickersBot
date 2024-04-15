@@ -1,6 +1,20 @@
+import { getURL } from 'vercel-grammy'
+import { getFileURL } from '../utils/telegram-bot.mjs'
 import { MongoDBAdapter } from '@grammyjs/storage-mongodb'
 import { Bot, Composer, InlineKeyboard, session } from 'grammy'
 import { bots, participants as collection, sessions } from '../db.mjs'
+
+const { GOAPI_KEY: key } = process.env
+
+const api = {
+  async: 'https://api.goapi.xyz/api/face_swap/v1/async',
+  fetch: 'https://api.goapi.xyz/api/face_swap/v1/fetch',
+}
+
+const init = {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
+}
 
 const defaults = { format: 'static', emoji_list: ['✨'] }
 
@@ -20,6 +34,7 @@ privateChats.use((ctx, next) =>
 )
 
 privateChats.command('start', async (ctx, next) => {
+  let taskPromise
   const id = ctx.match.trim()
   if (!id) return next()
   const date = new Date()
@@ -36,6 +51,41 @@ privateChats.command('start', async (ctx, next) => {
       await ctx.api.addStickerToSet(ctx.chat.id, name, sticker)
   } catch {
     await ctx.api.createNewStickerSet(ctx.chat.id, name, title, stickers)
+    const swap_image = getFileURL({
+      bot_id: ctx.me.id,
+      file_id: stickers.at(0),
+      mime_type: 'image/webp',
+      file_name: 'sticker.webp',
+    })
+    const array = new Array(1).fill(0)
+    const offset = session.sex === 'male' ? 1 : 11
+    const images = array.map((_, index) =>
+      getURL({ path: `/images/${index + offset}.png` })
+    )
+    taskPromise = Promise.allSettled(
+      images.map(async target_image => {
+        const {
+          data: { task_id },
+        } = await fetch(api.async, {
+          body: JSON.stringify({
+            result_type: 'url',
+            target_image,
+            swap_image,
+          }),
+          ...init,
+        }).then(res => res.json())
+        const {
+          data: { image: sticker },
+        } = await fetch(api.fetch, {
+          body: JSON.stringify({ task_id }),
+          ...init,
+        }).then(res => res.json())
+        await ctx.api.addStickerToSet(ctx.chat.id, name, {
+          ...defaults,
+          sticker,
+        })
+      })
+    )
   }
   await ctx.reply(`Стикеров загружено в ваш набор: ${stickers.length}`, {
     reply_markup: new InlineKeyboard()
@@ -43,6 +93,11 @@ privateChats.command('start', async (ctx, next) => {
       .text('Инструкция', 'help')
       .toFlowed(1),
   })
+  if (taskPromise) {
+    const results = await taskPromise
+    await ctx.reply(`Добавлено генеративных стикеров: ${results.length}`)
+    console.debug(results)
+  }
 })
 
 privateChats.callbackQuery('help', async ctx => {
