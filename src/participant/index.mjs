@@ -89,11 +89,11 @@ privateChats.command('start', async (ctx, next) => {
       const task = () =>
         fetch(api.fetch, { body: JSON.stringify({ task_id }), ...init })
           .then(res => res.json())
-          .then(result =>
-            processing.includes(result.data.status)
-              ? throw new Error('processing')
-              : result
-          )
+          .then(result => {
+            if (processing.includes(result.data.status))
+              throw new Error('processing')
+            return result
+          })
       const fetchResult = await pRetry(task, { signal })
       console.debug('fetchResult', fetchResult)
       const {
