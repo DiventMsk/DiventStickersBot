@@ -1,21 +1,29 @@
 import { Queue } from 'docmq'
-import { serve } from 'micro'
 import { Server } from 'node:http'
+import { json, serve } from 'micro'
 import { MongoDriver } from 'docmq/driver/mongo'
 
+const jobDefaults = {
+  retries: 60 * 60,
+  retryStrategy: { type: 'fixed', amount: 1 },
+}
+
 const queue = new Queue(new MongoDriver(process.env.MONGODB_URI), 'docmq')
+
+queue.events.on('halt', () => {
+  console.error('Received HALT from DocMQ')
+  process.exit(1)
+})
 
 queue.process(async (job, api) => {
   console.debug(job)
   await api.ack()
 })
 
-const server = new Server(
-  serve(async (req, res) => {
-    const time = Date.now()
-    await queue.enqueue({ payload: { time } })
-    return String(time)
-  })
-)
+async function handler(req, res) {
+  const payload = await json(req)
+  await queue.enqueue({ ...jobDefaults, payload })
+  return payload
+}
 
-server.listen(3000)
+new Server(serve(handler)).listen(3000)
