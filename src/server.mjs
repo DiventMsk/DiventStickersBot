@@ -49,7 +49,9 @@ queue.process(async (job, api) => {
   await fetch(new URL(`api/v1/upload/${bot_id}`, API_URL), {
     body: JSON.stringify({ user_id, name, sticker }),
     ...init,
-  }).then(res => res.json())
+  })
+    .then(res => res.json())
+    .catch(console.error)
   await api.ack()
 })
 
