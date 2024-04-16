@@ -14,7 +14,7 @@ const server = new Server(
   serve(async (req, res) => {
     const time = Date.now()
     await queue.enqueue({ payload: { time } })
-    return res.end(String(time))
+    return String(time)
   })
 )
 
