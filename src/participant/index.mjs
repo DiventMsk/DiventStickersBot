@@ -1,16 +1,11 @@
 import 'grammy-debug-edge'
-import pRetry from 'p-retry'
 import { getURL } from 'vercel-grammy'
 import { getFileURL } from '../utils/telegram-bot.mjs'
 import { MongoDBAdapter } from '@grammyjs/storage-mongodb'
 import { Bot, Composer, InlineKeyboard, session } from 'grammy'
 import { bots, participants as collection, sessions } from '../db.mjs'
 
-const { GOAPI_KEY: key } = process.env
-
-const defaultTimeout = 3000,
-  minTimeout = defaultTimeout,
-  maxTimeout = defaultTimeout
+const { GOAPI_KEY, QUEUE_URL } = process.env
 
 const api = {
   async: 'https://api.goapi.xyz/api/face_swap/v1/async',
@@ -19,10 +14,8 @@ const api = {
 
 const init = {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json', 'X-API-Key': key },
+  headers: { 'Content-Type': 'application/json', 'X-API-Key': GOAPI_KEY },
 }
-
-const processing = ['pending', 'starting', 'processing']
 
 const defaults = { format: 'static', emoji_list: ['✨'] }
 
@@ -45,7 +38,6 @@ privateChats.command('start', async (ctx, next) => {
   let taskPromise
   const id = ctx.match.trim()
   if (!id) return next()
-  const signal = AbortSignal.timeout(56_000)
   const date = new Date()
     .toLocaleString('ru', { dateStyle: 'short' })
     .replaceAll('.', '_')
@@ -91,7 +83,16 @@ privateChats.command('start', async (ctx, next) => {
         const {
           data: { task_id },
         } = asyncResult
-        const fetchResult = await pRetry(
+        await fetch(QUEUE_URL, {
+          body: JSON.stringify({
+            user_id: ctx.chat.id,
+            bot_id: ctx.me.id,
+            task_id,
+            name,
+          }),
+          ...init,
+        })
+        /* const fetchResult = await pRetry(
           () =>
             fetch(api.fetch, { body: JSON.stringify({ task_id }), ...init })
               .then(res => res.json())
@@ -109,7 +110,7 @@ privateChats.command('start', async (ctx, next) => {
         await ctx.api.addStickerToSet(ctx.chat.id, name, {
           ...defaults,
           sticker,
-        })
+        }) */
       })
     )
   }
@@ -154,6 +155,5 @@ export async function getBot(filter = {}) {
   const { token } = await bots.findOne(filter)
   const bot = new Bot(token)
   bot.use(composer)
-  await bot.init()
   return bot
 }

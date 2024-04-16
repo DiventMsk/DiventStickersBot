@@ -4,30 +4,6 @@
     {
       "source": "/api/v1/download/:bot_id/:file_id/:mime_base_type/:mime_sub_type/(.*)",
       "destination": "/api/v1/download"
-    },
-    {
-      "source": "/api/v1/download/:bot_id/:file_id/:mime_base_type/:mime_sub_type",
-      "destination": "/api/v1/download"
-    },
-    {
-      "source": "/api/v1/download/:bot_id/:file_id/(.*)",
-      "destination": "/api/v1/download"
-    },
-    {
-      "source": "/api/v1/download/:bot_id/:file_id",
-      "destination": "/api/v1/download"
-    },
-    {
-      "source": "/api/v1/download/:bot_id/(.*)",
-      "destination": "/api/v1/download"
-    },
-    {
-      "source": "/api/v1/download/:bot_id",
-      "destination": "/api/v1/download"
-    },
-    {
-      "source": "/api/v1/download/(.*)",
-      "destination": "/api/v1/download"
     }
   ]
 }
