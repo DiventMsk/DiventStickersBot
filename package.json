@@ -22,6 +22,7 @@
     "@grammyjs/storage-mongodb": "^2.4.2",
     "@vercel/edge-config": "^1.1.0",
     "@vercel/kv": "^1.0.1",
+    "docmq": "^0.5.7",
     "grammy": "^1.22.4",
     "grammy-debug-edge": "^0.0.0",
     "meow": "^13.2.0",
@@ -32,7 +33,6 @@
     "vercel-grammy": "^1.0.0"
   },
   "devDependencies": {
-    "docmq": "^0.5.7",
     "prettier": "3.2.5"
   }
 }
