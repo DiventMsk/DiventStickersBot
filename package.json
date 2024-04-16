@@ -32,7 +32,6 @@
   },
   "devDependencies": {
     "docmq": "^0.5.7",
-    "micro": "^10.0.1",
     "prettier": "3.2.5"
   }
 }
