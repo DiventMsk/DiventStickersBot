@@ -47,7 +47,7 @@ privateChats.command('start', async (ctx, next) => {
   const session = await sessions.findOne({ id })
   const stickers = session.stickers.map(sticker => ({ ...defaults, sticker }))
   try {
-    await ctx.api.getStickerSet(name)
+    console.debug(await ctx.api.getStickerSet(name))
     for (const sticker of stickers)
       await ctx.api
         .addStickerToSet(ctx.chat.id, name, sticker)
