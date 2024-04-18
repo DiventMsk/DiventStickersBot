@@ -12,7 +12,13 @@ export const POST = async req => {
   const id = /** @type string */ req.headers.get('x-vercel-id').split(':').pop()
   const url = new URL(bot.botInfo.username, 'https://t.me')
   url.searchParams.set('start', id)
-  await sessions.insertOne({ id, sex, stickers })
+  await sessions.insertOne({
+    bot: bot.botInfo.id,
+    date: new Date(),
+    stickers,
+    sex,
+    id,
+  })
   console.debug(url.href)
   return Response.json({ url })
 }

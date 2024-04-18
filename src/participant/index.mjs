@@ -2,8 +2,8 @@ import 'grammy-debug-edge'
 import { getURL } from 'vercel-grammy'
 import { getFileURL } from '../utils/telegram-bot.mjs'
 import { MongoDBAdapter } from '@grammyjs/storage-mongodb'
-import { Bot, Composer, InlineKeyboard, session } from 'grammy'
 import { bots, participants as collection, sessions } from '../db.mjs'
+import { Bot, Composer, Context, InlineKeyboard, session } from 'grammy'
 
 const { GOAPI_KEY, QUEUE_URL } = process.env
 
@@ -54,65 +54,48 @@ privateChats.command('start', async (ctx, next) => {
         .catch(console.error)
   } catch {
     await ctx.api.createNewStickerSet(ctx.chat.id, name, title, stickers)
-    const swap_image = getFileURL({
-      bot_id: ctx.me.id,
-      mime_type: 'image/webp',
-      file_name: 'sticker.webp',
-      file_id: session.stickers.at(0),
-    })
-    const array = new Array(10).fill(0)
-    const offset = session.sex === 'male' ? 1 : 11
-    const images = array.map((_, index) =>
-      getURL({ path: `/images/${index + offset}.png` })
-    )
-    taskPromise = Promise.allSettled(
-      images.map(async target_image => {
-        console.debug('body', {
-          target_image,
-          swap_image,
-        })
-        const asyncResult = await fetch(api.async, {
-          body: JSON.stringify({
-            result_type: 'url',
+    if (ctx.data.generative) {
+      const swap_image = getFileURL({
+        bot_id: ctx.me.id,
+        mime_type: 'image/webp',
+        file_name: 'sticker.webp',
+        file_id: session.stickers.at(0),
+      })
+      const array = new Array(10).fill(0)
+      const offset = session.sex === 'male' ? 1 : 11
+      const images = array.map((_, index) =>
+        getURL({ path: `/images/${index + offset}.png` })
+      )
+      taskPromise = Promise.allSettled(
+        images.map(async target_image => {
+          console.debug('body', {
             target_image,
             swap_image,
-          }),
-          ...init,
-        }).then(res => res.json())
-        console.debug('asyncResult', asyncResult)
-        const {
-          data: { task_id },
-        } = asyncResult
-        await fetch(QUEUE_URL, {
-          body: JSON.stringify({
-            user_id: ctx.chat.id,
-            bot_id: ctx.me.id,
-            task_id,
-            name,
-          }),
-          ...init,
+          })
+          const asyncResult = await fetch(api.async, {
+            body: JSON.stringify({
+              result_type: 'url',
+              target_image,
+              swap_image,
+            }),
+            ...init,
+          }).then(res => res.json())
+          console.debug('asyncResult', asyncResult)
+          const {
+            data: { task_id },
+          } = asyncResult
+          await fetch(QUEUE_URL, {
+            body: JSON.stringify({
+              user_id: ctx.chat.id,
+              bot_id: ctx.me.id,
+              task_id,
+              name,
+            }),
+            ...init,
+          })
         })
-        /* const fetchResult = await pRetry(
-          () =>
-            fetch(api.fetch, { body: JSON.stringify({ task_id }), ...init })
-              .then(res => res.json())
-              .then(result => {
-                if (processing.includes(result.data.status))
-                  throw new Error('processing')
-                return result
-              }),
-          { signal, minTimeout, maxTimeout }
-        )
-        console.debug('fetchResult', fetchResult)
-        const {
-          data: { image: sticker },
-        } = fetchResult
-        await ctx.api.addStickerToSet(ctx.chat.id, name, {
-          ...defaults,
-          sticker,
-        }) */
-      })
-    )
+      )
+    }
   }
   await ctx.reply(`Стикеров загружено в ваш набор: ${stickers.length}`, {
     reply_markup: new InlineKeyboard()
@@ -152,8 +135,15 @@ export async function getBotFromID(req) {
 }
 
 export async function getBot(filter = {}) {
-  const { token } = await bots.findOne(filter)
-  const bot = new Bot(token)
+  const data = await bots.findOne(filter)
+  const bot = new Bot(data.token, {
+    ContextConstructor: class extends Context {
+      constructor(update, api, me) {
+        super(update, api, me)
+        this.data = data
+      }
+    },
+  })
   bot.use(composer)
   return bot
 }
