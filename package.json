@@ -32,6 +32,7 @@
     "mongo-realm-web-wrapper": "^0.0.2",
     "mongodb": "^4.17.2",
     "p-retry": "^6.2.0",
+    "papaparse": "^5.4.1",
     "vercel-grammy": "^1.0.0"
   },
   "devDependencies": {

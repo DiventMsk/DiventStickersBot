@@ -38,9 +38,11 @@ privateChats.use(
   })
 )
 
-privateChats.use((ctx, next) =>
-  next((ctx.session.bots[ctx.me.username] = new Date()))
-)
+privateChats.use((ctx, next) => {
+  ctx.session.bots[ctx.me.username] = new Date()
+  ctx.session.user = ctx.chat
+  return next()
+})
 
 composer.use(conversations())
 
