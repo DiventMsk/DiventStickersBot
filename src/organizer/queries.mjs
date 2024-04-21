@@ -34,9 +34,10 @@ export async function callbackQueryMiddleware(ctx) {
         .toArray()
       const data = participantsData.map(
         ({
+          key: id,
           value: {
             quiz: { gift } = {},
-            user: { id, first_name, last_name } = {},
+            user: { first_name, last_name } = {},
           } = {},
         } = {}) => ({ id, first_name, last_name, gift })
       )
