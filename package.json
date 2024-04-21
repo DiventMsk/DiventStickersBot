@@ -37,5 +37,8 @@
   },
   "devDependencies": {
     "prettier": "3.2.5"
+  },
+  "overrides": {
+    "o-son": "npm:@ponomarevlad/o-son@1.0.1-web.1"
   }
 }
