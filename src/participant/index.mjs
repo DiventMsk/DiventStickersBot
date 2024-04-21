@@ -1,9 +1,17 @@
 import 'grammy-debug-edge'
+import {
+  Bot,
+  Composer,
+  Context,
+  InlineKeyboard,
+  Keyboard,
+  session,
+} from 'grammy'
 import { getURL } from 'vercel-grammy'
-import { getFileURL } from '../utils/telegram-bot.mjs'
 import { MongoDBAdapter } from '@grammyjs/storage-mongodb'
 import { bots, participants as collection, sessions } from '../db.mjs'
-import { Bot, Composer, Context, InlineKeyboard, session } from 'grammy'
+import { conversations, createConversation } from '@grammyjs/conversations'
+import { getFileURL, getRandomIntInclusive } from '../utils/telegram-bot.mjs'
 
 const { GOAPI_KEY, QUEUE_URL } = process.env
 
@@ -32,6 +40,66 @@ privateChats.use(
 
 privateChats.use((ctx, next) =>
   next((ctx.session.bots[ctx.me.username] = new Date()))
+)
+
+composer.use(conversations())
+
+composer.use(
+  createConversation(async (conversation, ctx) => {
+    if (conversation.session.quiz)
+      return ctx.reply('Вы уже получили свой бонус.')
+    conversation.session.quiz = {}
+    const variants = ['Да', 'Нет']
+    const reply_markup = Keyboard.from([variants])
+    await ctx.reply('Можно ли внедрить фирменный стиль компании в фотозону?', {
+      reply_markup,
+    })
+    conversation.session.quiz.style = await conversation.form.select(variants)
+    await ctx.reply(
+      'Конечно можно. Начиная от интерфейса тач панели и шрифтов, заканчивая брендовыми стикерами в каждом наборе.'
+    )
+    await ctx.reply(
+      'Можно ли еще раз сфотографироваться и добавить новые спикеры в набор?',
+      { reply_markup }
+    )
+    conversation.session.quiz.repeat = await conversation.form.select(variants)
+    await ctx.reply('Попробуйте еще раз сфотографироваться и увидите все сами.')
+    await ctx.reply(
+      'Можно ли редактировать визуал и информация бота, с которого приходит набор?',
+      { reply_markup }
+    )
+    conversation.session.quiz.custom = await conversation.form.select(variants)
+    await ctx.reply(
+      'Приветственный текст, адрес, аватарка и и описание настраивается под каждое событие.'
+    )
+    await ctx.reply(
+      'Можно ли внедрять дополнительные механики: квизы, рассылки, регистрацию, дарить подарки и т.д.',
+      { reply_markup }
+    )
+    conversation.session.quiz.extra = await conversation.form.select(variants)
+    await ctx.reply('Сейчас как раз в этом Вы и принимаете участие.')
+    const gift = (conversation.session.quiz.gift = getRandomIntInclusive(1, 5))
+    await ctx.replyWithPhoto(getURL({ path: `images/gifts/${gift}.jpg` }), {
+      caption: `
+Подробнее о вашем подарке вы можете узнать у менеджера компании.
+@divent_msk
+WhatsApp
+84993987442
+Divent.ru
+`,
+    })
+  }, 'quiz')
+)
+
+privateChats.command('test', ctx =>
+  ctx.reply(
+    'Предлагаем Вам сыграть в короткую викторину, чтобы получить приятный бонус.',
+    {
+      reply_markup: new InlineKeyboard()
+        .text('Нет', 'skip_quiz')
+        .text('Да', 'quiz'),
+    }
+  )
 )
 
 privateChats.command('start', async (ctx, next) => {
@@ -64,7 +132,7 @@ privateChats.command('start', async (ctx, next) => {
       const array = new Array(10).fill(0)
       const offset = session.sex === 'male' ? 1 : 11
       const images = array.map((_, index) =>
-        getURL({ path: `/images/${index + offset}.png` })
+        getURL({ path: `/images/faces/${index + offset}.png` })
       )
       taskPromise = Promise.allSettled(
         images.map(async target_image => {
@@ -109,6 +177,14 @@ privateChats.command('start', async (ctx, next) => {
     await ctx.reply(`Добавлено генеративных стикеров: ${results.length}`)
   }
 })
+
+privateChats.callbackQuery('quiz', ctx => ctx.conversation.enter('quiz'))
+
+privateChats.callbackQuery('skip_quiz', ctx =>
+  ctx.reply(
+    'Согласны, нужно успеть все посмотреть, Вы сможете продолжить в любое время, нажав “да” в предыдущем сообщении.'
+  )
+)
 
 privateChats.callbackQuery('help', async ctx => {
   await ctx.reply(`

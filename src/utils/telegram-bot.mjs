@@ -26,3 +26,9 @@ export function getFileURL({ bot_id, file_id, mime_type, file_name } = {}) {
   if (file_name) ({ href } = new URL(file_name, href + '/'))
   return href
 }
+
+export function getRandomIntInclusive(min, max) {
+  const minCeiled = Math.ceil(min)
+  const maxFloored = Math.floor(max)
+  return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled)
+}

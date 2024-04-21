@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@grammyjs/commands": "^0.5.0",
+    "@grammyjs/conversations": "^1.2.0",
     "@grammyjs/stateless-question": "^3.0.1",
     "@grammyjs/storage-mongodb": "^2.4.2",
     "@vercel/edge-config": "^1.1.0",
