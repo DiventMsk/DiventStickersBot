@@ -34,8 +34,10 @@ export async function callbackQueryMiddleware(ctx) {
         .toArray()
       const data = participantsData.map(
         ({
-          quiz: { gift } = {},
-          user: { id, first_name, last_name } = {},
+          value: {
+            quiz: { gift } = {},
+            user: { id, first_name, last_name } = {},
+          } = {},
         } = {}) => ({ id, first_name, last_name, gift })
       )
       const csv = Papa.unparse([columns, ...data], {
