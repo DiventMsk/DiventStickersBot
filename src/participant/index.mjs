@@ -44,9 +44,9 @@ privateChats.use((ctx, next) => {
   return next()
 })
 
-composer.use(conversations())
+privateChats.use(conversations())
 
-composer.use(
+privateChats.use(
   createConversation(async (conversation, ctx) => {
     if (conversation.session.quiz)
       return ctx.reply('Вы уже получили свой бонус.')
