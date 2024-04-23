@@ -123,7 +123,10 @@ privateChats.command('start', async (ctx, next) => {
         .addStickerToSet(ctx.chat.id, name, sticker)
         .catch(console.error)
   } catch {
-    await ctx.api.createNewStickerSet(ctx.chat.id, name, title, stickers)
+    const { sticker } = ctx.data
+    const defaultSticker = sticker ? { ...defaults, sticker } : null
+    const initialStickers = [defaultSticker, ...stickers].filter(Boolean)
+    await ctx.api.createNewStickerSet(ctx.chat.id, name, title, initialStickers)
     if (ctx.data.generative) {
       const swap_image = getFileURL({
         bot_id: ctx.me.id,
