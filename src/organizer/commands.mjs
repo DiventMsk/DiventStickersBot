@@ -22,8 +22,8 @@ commands.command('bots', 'Управление ботами').addToScope(scope, 
   if (!botsData.length)
     return ctx.reply('Добавьте первого бота используя команду /create')
   await ctx.reply('Выберите бота для управления:')
-  for (const { id } of botsData)
-    await ctx.reply(id, {
+  for (const { username } of botsData)
+    await ctx.reply(`@${username}`, {
       reply_markup: new InlineKeyboardWithJSON().json('Настроить бота', {
         action: 'edit',
         id,
