@@ -1,6 +1,7 @@
 import Papa from 'papaparse'
 import { InputFile } from 'grammy'
 import { bots, participants } from '../db.mjs'
+import { stickerQuestion } from './questions.mjs'
 import { InlineKeyboardWithJSON } from '../utils/telegram-bot.mjs'
 
 const columns = {
@@ -49,6 +50,11 @@ export async function callbackQueryMiddleware(ctx) {
       const stream = new Blob([csv]).stream()
       const file = new InputFile(stream, `${bot.username}.csv`)
       return ctx.replyWithDocument(file)
+    case 'sticker':
+      return stickerQuestion.replyWithMarkdown(
+        ctx,
+        'Отправьте изображение для стикера по умолчанию'
+      )
   }
   return ctx.answerCallbackQuery({
     text: 'Действие не поддерживается',

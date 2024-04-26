@@ -23,3 +23,18 @@ export const tokenQuestion = new StatelessQuestion('token', async ctx => {
     }),
   })
 })
+
+export const stickerQuestion = new StatelessQuestion(
+  'sticker',
+  async (ctx, additionalState) => {
+    const { sticker: { file_id: sticker } = {} } = ctx.msg
+    if (!sticker)
+      return stickerQuestion.replyWithMarkdown(
+        ctx,
+        'Поддерживается изображения в формате WEBP и разрешением 512 на 512'
+      )
+    const { id } = JSON.parse(additionalState)
+    await bots.updateOne({ id }, { $set: { sticker } })
+    await ctx.reply('Стикер будет использоваться в наборах по умолчанию')
+  }
+)
