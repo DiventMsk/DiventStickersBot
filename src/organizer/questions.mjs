@@ -31,7 +31,8 @@ export const stickerQuestion = new StatelessQuestion(
     if (!sticker)
       return stickerQuestion.replyWithMarkdown(
         ctx,
-        'Поддерживается изображения в формате WEBP и разрешением 512 на 512'
+        'Поддерживается изображения в формате WEBP и разрешением 512 на 512',
+        additionalState
       )
     const { id } = JSON.parse(additionalState)
     await bots.updateOne({ id }, { $set: { sticker } })

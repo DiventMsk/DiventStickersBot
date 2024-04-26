@@ -53,7 +53,8 @@ export async function callbackQueryMiddleware(ctx) {
     case 'sticker':
       return stickerQuestion.replyWithMarkdown(
         ctx,
-        'Отправьте изображение для стикера по умолчанию'
+        'Отправьте изображение для стикера по умолчанию',
+        JSON.stringify({ id })
       )
   }
   return ctx.answerCallbackQuery({
