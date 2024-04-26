@@ -1,7 +1,7 @@
 import 'grammy-debug-edge'
 import { Bot } from 'grammy'
 import { commands } from './commands.mjs'
-import { tokenQuestion } from './questions.mjs'
+import { stickerQuestion, tokenQuestion } from './questions.mjs'
 import { callbackQueryMiddleware } from './queries.mjs'
 import { secretTokenFromToken } from '../utils/telegram-bot.mjs'
 
@@ -17,6 +17,8 @@ export const bot = new Bot(token)
 const privateChats = bot.errorBoundary(console.error).chatType('private')
 
 privateChats.on('callback_query:data', callbackQueryMiddleware)
+
+privateChats.use(stickerQuestion.middleware())
 
 privateChats.use(tokenQuestion.middleware())
 
