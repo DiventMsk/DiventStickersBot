@@ -71,6 +71,7 @@ export async function callbackQueryMiddleware(ctx) {
         { reply_markup: new InlineKeyboardWithJSON([buttons]).toFlowed(1) }
       )
     case 'set_client':
+      await bots.updateMany({ client }, { $set: { client: null } })
       await bots.updateOne({ id }, { $set: { client } })
       return ctx.reply(`Площадка ${client} связана с ботом`)
   }
