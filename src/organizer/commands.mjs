@@ -18,11 +18,11 @@ commands
 
 commands.command('bots', 'Управление ботами').addToScope(scope, async ctx => {
   await ctx.replyWithChatAction('typing')
-  const botsData = await bots.find().toArray()
-  if (!botsData.length)
+  const allBots = await bots.find().toArray()
+  if (!allBots.length)
     return ctx.reply('Добавьте первого бота используя команду /create')
   await ctx.reply('Выберите бота для управления:')
-  for (const { id, username } of botsData)
+  for (const { id, username } of allBots)
     await ctx.reply(`@${username}`, {
       reply_markup: new InlineKeyboardWithJSON().json('Настроить бота', {
         action: 'edit',

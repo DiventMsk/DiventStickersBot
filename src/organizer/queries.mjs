@@ -1,6 +1,6 @@
 import Papa from 'papaparse'
 import { InputFile } from 'grammy'
-import { bots, participants } from '../db.mjs'
+import { bots, clients, participants } from '../db.mjs'
 import { stickerQuestion } from './questions.mjs'
 import { InlineKeyboardWithJSON } from '../utils/telegram-bot.mjs'
 
@@ -12,7 +12,7 @@ const columns = {
 }
 
 export async function callbackQueryMiddleware(ctx) {
-  const { action, id, ...data } = JSON.parse(ctx.callbackQuery.data)
+  const { action, id, client, ...data } = JSON.parse(ctx.callbackQuery.data)
   const bot = await bots.findOne({ id })
   switch (action) {
     case 'edit':
@@ -21,6 +21,7 @@ export async function callbackQueryMiddleware(ctx) {
         reply_markup: new InlineKeyboardWithJSON()
           .json('Скачать список участников', { id, action: 'export' })
           .json('Выбрать стикер по умолчанию', { id, action: 'sticker' })
+          .json('Выбрать площадку', { id, action: 'client' })
           .json('Удалить бота', { id, action: 'delete' })
           .toFlowed(1),
       })
@@ -30,10 +31,10 @@ export async function callbackQueryMiddleware(ctx) {
       return ctx.reply(ok ? 'Бот успешно удален' : 'Не удалось удалить бота')
     case 'export':
       const field = `value.bots.${bot.username}`
-      const participantsData = await participants
+      const botParticipants = await participants
         .find({ [field]: { $exists: true } })
         .toArray()
-      const data = participantsData.map(
+      const data = botParticipants.map(
         ({
           key: id,
           value: {
@@ -56,6 +57,22 @@ export async function callbackQueryMiddleware(ctx) {
         'Отправьте изображение для стикера по умолчанию',
         JSON.stringify({ id })
       )
+    case 'client':
+      const allClients = await clients.find().toArray()
+      const buttons = allClients.map(({ client, date }) =>
+        InlineKeyboardWithJSON.json(`${client} (${date})`, {
+          action: 'set_client',
+          client,
+          id,
+        })
+      )
+      return ctx.reply(
+        'Выберите площадку, которая будет связана с этим ботом',
+        { reply_markup: new InlineKeyboardWithJSON([buttons]).toFlowed(1) }
+      )
+    case 'set_client':
+      await bots.updateOne({ id }, { $set: { client } })
+      return ctx.reply(`Площадка ${client} связана с ботом`)
   }
   return ctx.answerCallbackQuery({
     text: 'Действие не поддерживается',
