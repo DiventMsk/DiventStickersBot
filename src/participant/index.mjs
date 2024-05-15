@@ -25,7 +25,7 @@ const init = {
   headers: { 'Content-Type': 'application/json', 'X-API-Key': GOAPI_KEY },
 }
 
-const defaults = { format: 'static', emoji_list: ['✨'] }
+const toSticker = sticker => ({ emoji_list: ['✨'], format: 'static', sticker })
 
 export const composer = new Composer()
 
@@ -115,19 +115,19 @@ privateChats.command('start', async (ctx, next) => {
   const name = `at_${date}_for_${ctx.chat.id}_by_${ctx.me.username}`
   const { href } = new URL(name, 'https://t.me/addstickers/')
   const session = await sessions.findOne({ id })
-  const stickers = session.stickers.map(sticker => ({ ...defaults, sticker }))
+  const userStickers = session.stickers.map(toSticker)
   try {
     console.debug(await ctx.api.getStickerSet(name))
-    for (const sticker of stickers)
+    for (const sticker of userStickers)
       await ctx.api
         .addStickerToSet(ctx.chat.id, name, sticker)
         .catch(console.error)
   } catch {
-    const { sticker } = ctx.data
-    const defaultSticker = sticker ? { ...defaults, sticker } : null
-    const initialStickers = [defaultSticker, ...stickers].filter(Boolean)
+    const { sticker, stickers: defaultStickers = [sticker] } = ctx.data
+    const botStickers = defaultStickers.map(toSticker)
+    const initialStickers = [...botStickers, ...userStickers].filter(Boolean)
     await ctx.api.createNewStickerSet(ctx.chat.id, name, title, initialStickers)
-    if (ctx.data.generative) {
+    if (ctx.data.generative && session.stickers.length) {
       const swap_image = getFileURL({
         bot_id: ctx.me.id,
         mime_type: 'image/webp',
