@@ -25,10 +25,10 @@ const init = {
   headers: { 'Content-Type': 'application/json', 'X-API-Key': GOAPI_KEY },
 }
 
-const getDefaultImages = (offset = 1, length = 10) =>
-  new Array(length)
-    .fill(0)
-    .map((_, index) => getURL({ path: `/images/faces/${index + offset}.png` }))
+const getDefaultImages = (offset = 1, length = 10) => {
+  const array = new Array(length).fill(0)
+  return array.map((_, index) => `/images/faces/${index + offset}.png`)
+}
 
 const defaultImages = {
   get male() {
@@ -142,45 +142,47 @@ privateChats.command('start', async (ctx, next) => {
       images = defaultImages,
       stickers: defaultStickers = [sticker],
     } = ctx.data
+    const targetImages = images[session.sex] || []
     const botStickers = defaultStickers.map(toSticker)
     const initialStickers = [...botStickers, ...userStickers].filter(Boolean)
     await ctx.api.createNewStickerSet(ctx.chat.id, name, title, initialStickers)
-    if (ctx.data.generative && session.stickers.length) {
+    if (ctx.data.generative && session.stickers.length && targetImages.length) {
       const swap_image = getFileURL({
         bot_id: ctx.me.id,
         mime_type: 'image/webp',
         file_name: 'sticker.webp',
         file_id: session.stickers.at(0),
       })
-      const targetImages = images[session.sex] || []
       taskPromise = Promise.allSettled(
-        targetImages.map(async target_image => {
-          console.debug('body', {
-            target_image,
-            swap_image,
-          })
-          const asyncResult = await fetch(api.async, {
-            body: JSON.stringify({
-              result_type: 'url',
+        targetImages
+          .map(path => getURL({ path }))
+          .map(async target_image => {
+            console.debug('body', {
               target_image,
               swap_image,
-            }),
-            ...init,
-          }).then(res => res.json())
-          console.debug('asyncResult', asyncResult)
-          const {
-            data: { task_id },
-          } = asyncResult
-          await fetch(QUEUE_URL, {
-            body: JSON.stringify({
-              user_id: ctx.chat.id,
-              bot_id: ctx.me.id,
-              task_id,
-              name,
-            }),
-            ...init,
+            })
+            const asyncResult = await fetch(api.async, {
+              body: JSON.stringify({
+                result_type: 'url',
+                target_image,
+                swap_image,
+              }),
+              ...init,
+            }).then(res => res.json())
+            console.debug('asyncResult', asyncResult)
+            const {
+              data: { task_id },
+            } = asyncResult
+            await fetch(QUEUE_URL, {
+              body: JSON.stringify({
+                user_id: ctx.chat.id,
+                bot_id: ctx.me.id,
+                task_id,
+                name,
+              }),
+              ...init,
+            })
           })
-        })
       )
     }
   }
