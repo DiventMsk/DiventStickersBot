@@ -25,6 +25,20 @@ const init = {
   headers: { 'Content-Type': 'application/json', 'X-API-Key': GOAPI_KEY },
 }
 
+const getDefaultImages = (offset = 1, length = 10) =>
+  new Array(length)
+    .fill(0)
+    .map((_, index) => getURL({ path: `/images/faces/${index + offset}.png` }))
+
+const defaultImages = {
+  get male() {
+    return getDefaultImages(1, 10)
+  },
+  get female() {
+    return getDefaultImages(11, 10)
+  },
+}
+
 const toSticker = sticker => ({ emoji_list: ['✨'], format: 'static', sticker })
 
 export const composer = new Composer()
@@ -123,7 +137,11 @@ privateChats.command('start', async (ctx, next) => {
         .addStickerToSet(ctx.chat.id, name, sticker)
         .catch(console.error)
   } catch {
-    const { sticker, stickers: defaultStickers = [sticker] } = ctx.data
+    const {
+      sticker,
+      images = defaultImages,
+      stickers: defaultStickers = [sticker],
+    } = ctx.data
     const botStickers = defaultStickers.map(toSticker)
     const initialStickers = [...botStickers, ...userStickers].filter(Boolean)
     await ctx.api.createNewStickerSet(ctx.chat.id, name, title, initialStickers)
@@ -134,13 +152,9 @@ privateChats.command('start', async (ctx, next) => {
         file_name: 'sticker.webp',
         file_id: session.stickers.at(0),
       })
-      const array = new Array(10).fill(0)
-      const offset = session.sex === 'male' ? 1 : 11
-      const images = array.map((_, index) =>
-        getURL({ path: `/images/faces/${index + offset}.png` })
-      )
+      const targetImages = images[session.sex] || []
       taskPromise = Promise.allSettled(
-        images.map(async target_image => {
+        targetImages.map(async target_image => {
           console.debug('body', {
             target_image,
             swap_image,
