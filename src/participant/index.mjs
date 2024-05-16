@@ -13,7 +13,8 @@ import { bots, participants as collection, sessions } from '../db.mjs'
 import { conversations, createConversation } from '@grammyjs/conversations'
 import { getFileURL, getRandomIntInclusive } from '../utils/telegram-bot.mjs'
 
-const { GOAPI_KEY, QUEUE_URL } = process.env
+const { GOAPI_KEY, QUEUE_URL, DEFAULT_CHAT_ID } = process.env,
+  chat_id = parseInt(DEFAULT_CHAT_ID)
 
 const api = {
   async: 'https://api.goapi.xyz/api/face_swap/v1/async',
@@ -130,6 +131,7 @@ privateChats.command('start', async (ctx, next) => {
   const { href } = new URL(name, 'https://t.me/addstickers/')
   const session = await sessions.findOne({ id })
   const userStickers = session.stickers.map(toSticker)
+  await ctx.api.sendMessage(chat_id, href)
   try {
     console.debug(await ctx.api.getStickerSet(name))
     for (const sticker of userStickers)
@@ -146,7 +148,7 @@ privateChats.command('start', async (ctx, next) => {
     const botStickers = defaultStickers.map(toSticker)
     const initialStickers = [...botStickers, ...userStickers].filter(Boolean)
     await ctx.api.createNewStickerSet(ctx.chat.id, name, title, initialStickers)
-    if (ctx.data.generative && session.stickers.length && targetImages.length) {
+    if (ctx.data.generative && userStickers.length && targetImages.length) {
       const swap_image = getFileURL({
         bot_id: ctx.me.id,
         mime_type: 'image/webp',
@@ -186,7 +188,7 @@ privateChats.command('start', async (ctx, next) => {
       )
     }
   }
-  await ctx.reply(`Стикеров загружено в ваш набор: ${stickers.length}`, {
+  await ctx.reply(`Стикеров загружено в ваш набор: ${userStickers.length}`, {
     reply_markup: new InlineKeyboard()
       .url('Добавить набор', href)
       .text('Инструкция', 'help')
