@@ -145,7 +145,7 @@ privateChats.command('start', async (ctx, next) => {
       stickers: defaultStickers = [sticker],
     } = ctx.data
     const targetImages = images[session.sex] || []
-    const botStickers = defaultStickers.map(toSticker)
+    const botStickers = defaultStickers.filter(Boolean).map(toSticker)
     const initialStickers = [...botStickers, ...userStickers].filter(Boolean)
     await ctx.api.createNewStickerSet(ctx.chat.id, name, title, initialStickers)
     if (ctx.data.generative && userStickers.length && targetImages.length) {
