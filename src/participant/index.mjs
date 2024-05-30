@@ -129,7 +129,14 @@ privateChats.command('start', async (ctx, next) => {
   const title = 'Stickers by @DiventDigital'
   const name = `at_${date}_for_${ctx.chat.id}_by_${ctx.me.username}`
   const { href } = new URL(name, 'https://t.me/addstickers/')
-  const session = await sessions.findOne({ id })
+  const session = await sessions.findOneAndUpdate(
+    {
+      id,
+      used: { $exists: false },
+    },
+    { $set: { used: ctx.chat.id } }
+  )
+  if (!session) return ctx.reply('Стикеры не найдены или уже были добавлены')
   const userStickers = session.stickers.map(toSticker)
   await ctx.api.sendMessage(chat_id, href)
   try {
