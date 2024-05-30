@@ -7,8 +7,8 @@ import {
   Keyboard,
   session,
 } from 'grammy'
-import { ObjectId } from 'mongodb'
 import { getURL } from 'vercel-grammy'
+import { BSON } from 'mongo-realm-web-wrapper'
 import { MongoDBAdapter } from '@grammyjs/storage-mongodb'
 import { bots, participants as collection, sessions } from '../db.mjs'
 import { conversations, createConversation } from '@grammyjs/conversations'
@@ -132,7 +132,7 @@ privateChats.command('start', async (ctx, next) => {
   const { href } = new URL(name, 'https://t.me/addstickers/')
   const session = await sessions.findOneAndUpdate(
     {
-      _id: new ObjectId(id),
+      _id: new BSON.ObjectId(id),
       used: { $exists: false },
     },
     { $set: { used: ctx.chat.id } }
