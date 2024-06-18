@@ -14,7 +14,7 @@ import { bots, participants as collection, sessions } from '../db.mjs'
 import { conversations, createConversation } from '@grammyjs/conversations'
 import { getFileURL, getRandomIntInclusive } from '../utils/telegram-bot.mjs'
 
-const { GOAPI_KEY, QUEUE_URL } = process.env
+const { GOAPI_KEY, QUEUE_URL, TELEGRAM_BOT_TOKEN: token } = process.env
 
 const api = {
   async: 'https://api.goapi.xyz/api/face_swap/v1/async',
@@ -64,7 +64,17 @@ privateChats.on('msg:chat_shared', async (ctx, next) => {
   const { id } = ctx.me
   const { chat_id } = ctx.msg.chat_shared
   await bots.updateOne({ id }, { $set: { chat_id } })
-  return ctx.reply('Настройка завершена, бот готов к работе')
+  const bot = new Bot(token)
+  await bot.init()
+  return ctx.reply(
+    'Готово, нажмите на кнопку для управления остальными настройками бота',
+    {
+      reply_markup: new InlineKeyboard().url(
+        'Настроить бота',
+        `https://t.me/${bot.botInfo.username}?start=${id}`
+      ),
+    }
+  )
 })
 
 privateChats.use(
