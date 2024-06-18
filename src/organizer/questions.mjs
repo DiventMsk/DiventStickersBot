@@ -1,27 +1,28 @@
-import { Bot } from 'grammy'
+import { Bot, InlineKeyboard } from 'grammy'
 import { bots } from '../db.mjs'
 import { getURL } from 'vercel-grammy'
 import { StatelessQuestion } from '@grammyjs/stateless-question'
-import {
-  InlineKeyboardWithJSON,
-  secretTokenFromToken,
-} from '../utils/telegram-bot.mjs'
+import { secretTokenFromToken } from '../utils/telegram-bot.mjs'
 
 export const tokenQuestion = new StatelessQuestion('token', async ctx => {
   const token = ctx.msg.text.trim()
   const bot = new Bot(token)
   await bot.init()
+  const { id: creator } = ctx.chat
   const { id, username } = bot.botInfo
-  const $set = { ...bot.botInfo, token }
+  const $set = { ...bot.botInfo, token, creator }
   const url = getURL({ path: `api/v1/webhook/${id}` })
   await bots.updateOne({ id }, { $set }, { upsert: true })
   await bot.api.setWebhook(url, { secret_token: secretTokenFromToken(token) })
-  await ctx.reply(`Бот @${username} подключен и готов к работе`, {
-    reply_markup: new InlineKeyboardWithJSON().json('Настроить бота', {
-      action: 'edit',
-      id,
-    }),
-  })
+  await ctx.reply(
+    `Бот @${username} подключен, для завершения настройки, нужно его запустить`,
+    {
+      reply_markup: new InlineKeyboard().url(
+        'Запустить бота',
+        `https://t.me/${username}?start=setup`
+      ),
+    }
+  )
 })
 
 export const stickerQuestion = new StatelessQuestion(

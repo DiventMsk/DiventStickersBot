@@ -47,6 +47,30 @@ export const composer = new Composer()
 
 const privateChats = composer.errorBoundary(console.error).chatType('private')
 
+privateChats.command('start', (ctx, next) => {
+  if (ctx.match !== 'setup' || ctx.chat.id !== ctx.data.creator) return next()
+  return ctx.reply(
+    'Для завершения настройки бота, нужно выбрать чат, в который будут загружаться изображения перед созданием наборов',
+    {
+      reply_markup: new Keyboard()
+        .requestChat('Продолжить', 0, {
+          chat_is_channel: false,
+          user_administrator_rights: { can_manage_chat: true },
+        })
+        .oneTime()
+        .resized(),
+    },
+  )
+})
+
+privateChats.on('msg:chat_shared', (ctx, next) => {
+  if (ctx.data.chat_id || ctx.chat.id !== ctx.data.creator) return next()
+  const { id } = ctx.me
+  const { chat_id } = ctx.msg.chat_shared
+  await bots.updateOne({ id }, { $set: { chat_id } })
+  return ctx.reply('Настройка завершена, бот готов к работе')
+})
+
 privateChats.use(
   session({
     storage: new MongoDBAdapter({ collection }),
