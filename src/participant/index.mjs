@@ -56,6 +56,7 @@ privateChats.command('start', (ctx, next) => {
         .requestChat('Продолжить', 0, {
           chat_is_channel: false,
           user_administrator_rights: { can_manage_chat: true },
+          bot_administrator_rights: { can_post_messages: true },
         })
         .oneTime()
         .resized(),
