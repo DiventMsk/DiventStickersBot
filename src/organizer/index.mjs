@@ -24,10 +24,12 @@ privateChats.use(tokenQuestion.middleware())
 
 privateChats.use(commands)
 
-privateChats.command('start', ctx => {
-  if (ctx.match) return edit(ctx, await bots.findOne({ id: parseInt(ctx.match) }))
-  return ctx.reply(`
+privateChats.command('start', async ctx => {
+  if (!ctx.match)
+    return ctx.reply(`
 Добро пожаловать в конфигурационного бота!
 Для продолжения, выберите необходимый пункт в меню
 `)
+  const bot = await bots.findOne({ id: parseInt(ctx.match) })
+  return edit(ctx, bot)
 })
