@@ -11,20 +11,25 @@ const columns = {
   gift: 'Подарок',
 }
 
+export function edit(ctx, bot) {
+  if (!bot) return ctx.reply('Указанный бот не найден')
+  const { id } = bot
+  return ctx.reply(id, {
+    reply_markup: new InlineKeyboardWithJSON()
+      .json('Скачать список участников', { id, action: 'export' })
+      .json('Выбрать стикер по умолчанию', { id, action: 'sticker' })
+      .json('Выбрать площадку', { id, action: 'client' })
+      .json('Удалить бота', { id, action: 'delete' })
+      .toFlowed(1),
+  })
+}
+
 export async function callbackQueryMiddleware(ctx) {
   const { action, id, client, ...data } = JSON.parse(ctx.callbackQuery.data)
   const bot = await bots.findOne({ id })
   switch (action) {
     case 'edit':
-      if (!bot) return ctx.reply('Указанный бот не найден')
-      return ctx.reply(id, {
-        reply_markup: new InlineKeyboardWithJSON()
-          .json('Скачать список участников', { id, action: 'export' })
-          .json('Выбрать стикер по умолчанию', { id, action: 'sticker' })
-          .json('Выбрать площадку', { id, action: 'client' })
-          .json('Удалить бота', { id, action: 'delete' })
-          .toFlowed(1),
-      })
+      return edit(ctx, bot)
     case 'delete':
       if (!bot) return ctx.reply('Указанный бот не найден')
       const { deletedCount: ok } = await bots.deleteOne({ id })

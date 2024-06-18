@@ -2,7 +2,7 @@ import 'grammy-debug-edge'
 import { Bot } from 'grammy'
 import { commands } from './commands.mjs'
 import { stickerQuestion, tokenQuestion } from './questions.mjs'
-import { callbackQueryMiddleware } from './queries.mjs'
+import { callbackQueryMiddleware, edit } from './queries.mjs'
 import { secretTokenFromToken } from '../utils/telegram-bot.mjs'
 
 export { commands }
@@ -24,9 +24,10 @@ privateChats.use(tokenQuestion.middleware())
 
 privateChats.use(commands)
 
-privateChats.command('start', ctx =>
-  ctx.reply(`
+privateChats.command('start', ctx => {
+  if (ctx.match) return edit(ctx, await bots.findOne({ id: parseInt(ctx.match) }))
+  return ctx.reply(`
 Добро пожаловать в конфигурационного бота!
 Для продолжения, выберите необходимый пункт в меню
 `)
-)
+})
