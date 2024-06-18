@@ -53,13 +53,7 @@ privateChats.command('start', (ctx, next) => {
     'Для завершения настройки бота, нужно выбрать чат, в который будут загружаться изображения перед созданием наборов',
     {
       reply_markup: new Keyboard()
-        .requestChat('Продолжить', 0, {
-          bot_administrator_rights: { can_manage_chat: true },
-          user_administrator_rights: { can_manage_chat: true },
-        })
-        .requestChat('Продолжить', 3, {
-          bot_is_member: true,
-        })
+        .requestChat('Продолжить', 0, { bot_is_member: true })
         .oneTime()
         .resized(),
     }
