@@ -60,7 +60,7 @@ privateChats.command('start', (ctx, next) => {
 })
 
 privateChats.on('msg:chat_shared', async (ctx, next) => {
-  if (ctx.data.chat_id || ctx.chat.id !== ctx.data.creator) return next()
+  if (ctx.chat.id !== ctx.data.creator) return next()
   const { id } = ctx.me
   const { chat_id } = ctx.msg.chat_shared
   await bots.updateOne({ id }, { $set: { chat_id } })
