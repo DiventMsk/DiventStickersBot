@@ -14,8 +14,7 @@ import { bots, participants as collection, sessions } from '../db.mjs'
 import { conversations, createConversation } from '@grammyjs/conversations'
 import { getFileURL, getRandomIntInclusive } from '../utils/telegram-bot.mjs'
 
-const { GOAPI_KEY, QUEUE_URL, DEFAULT_CHAT_ID } = process.env,
-  chat_id = parseInt(DEFAULT_CHAT_ID)
+const { GOAPI_KEY, QUEUE_URL } = process.env
 
 const api = {
   async: 'https://api.goapi.xyz/api/face_swap/v1/async',
@@ -160,7 +159,7 @@ privateChats.command('start', async (ctx, next) => {
   )
   if (!session) return ctx.reply('Стикеры не найдены или уже были добавлены')
   const userStickers = session.stickers.map(toSticker)
-  await ctx.api.sendMessage(chat_id, href)
+  await ctx.api.sendMessage(ctx.data.chat_id, href)
   try {
     console.debug(await ctx.api.getStickerSet(name))
     for (const sticker of userStickers)
