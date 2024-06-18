@@ -1,5 +1,6 @@
 import 'grammy-debug-edge'
 import { Bot } from 'grammy'
+import { bots } from '../db.mjs'
 import { commands } from './commands.mjs'
 import { stickerQuestion, tokenQuestion } from './questions.mjs'
 import { callbackQueryMiddleware, edit } from './queries.mjs'
