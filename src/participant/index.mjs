@@ -57,6 +57,16 @@ privateChats.command('start', (ctx, next) => {
           bot_administrator_rights: { can_manage_chat: true },
           user_administrator_rights: { can_manage_chat: true },
         })
+        .requestChat('Продолжить', 0, {
+          bot_administrator_rights: { can_post_messages: true },
+          user_administrator_rights: { can_post_messages: true },
+        })
+        .requestChat('Продолжить', 0, {
+          bot_administrator_rights: { can_post_messages: true },
+        })
+        .requestChat('Продолжить', 0, {
+          bot_is_member: true,
+        })
         .oneTime()
         .resized(),
     }
