@@ -59,11 +59,11 @@ privateChats.command('start', (ctx, next) => {
         })
         .oneTime()
         .resized(),
-    },
+    }
   )
 })
 
-privateChats.on('msg:chat_shared', (ctx, next) => {
+privateChats.on('msg:chat_shared', async (ctx, next) => {
   if (ctx.data.chat_id || ctx.chat.id !== ctx.data.creator) return next()
   const { id } = ctx.me
   const { chat_id } = ctx.msg.chat_shared
