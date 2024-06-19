@@ -103,7 +103,7 @@ export async function callbackQueryMiddleware(ctx) {
             'Включить генеративные стикеры',
             {
               id,
-              action: 'client',
+              action: 'toggle_generative',
             }
           ),
         }
