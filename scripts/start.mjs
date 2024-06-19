@@ -1,7 +1,11 @@
+import { bots } from '../src/db.mjs'
 import { bot } from '../src/organizer/index.mjs'
+import { getBot } from '../src/participant/index.mjs'
 
-// Prevent error throw
-bot.catch(console.error)
+const participantBots = await bots.find().toArray()
 
-// Starts bot in long-polling mode
-await bot.start()
+const allBots = [bot, ...participantBots.map(data => getBot(data))]
+
+allBots.forEach(bot => bot.catch(console.error))
+
+await Promise.all(allBots.map(bot => bot.start()))

@@ -2,7 +2,11 @@ import 'grammy-debug-edge'
 import { Bot } from 'grammy'
 import { bots } from '../db.mjs'
 import { commands } from './commands.mjs'
-import { stickerQuestion, tokenQuestion } from './questions.mjs'
+import {
+  stickersQuestion,
+  stickerQuestion,
+  tokenQuestion,
+} from './questions.mjs'
 import { callbackQueryMiddleware, edit } from './queries.mjs'
 import { secretTokenFromToken } from '../utils/telegram-bot.mjs'
 
@@ -18,6 +22,8 @@ export const bot = new Bot(token)
 const privateChats = bot.errorBoundary(console.error).chatType('private')
 
 privateChats.on('callback_query:data', callbackQueryMiddleware)
+
+privateChats.use(stickersQuestion.middleware())
 
 privateChats.use(stickerQuestion.middleware())
 

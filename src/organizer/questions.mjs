@@ -40,3 +40,25 @@ export const stickerQuestion = new StatelessQuestion(
     await ctx.reply('Стикер будет использоваться в наборах по умолчанию')
   }
 )
+
+export const stickersQuestion = new StatelessQuestion(
+  'stickers',
+  async (ctx, additionalState) => {
+    try {
+      const { set_name } = ctx.msg.sticker
+      const { id } = JSON.parse(additionalState)
+      const { title } = await ctx.api.getStickerSet(set_name)
+      await bots.updateOne({ id }, { $set: { set_name } })
+      return ctx.reply(
+        `Готово, стикеры из набора "${title}" будут использоваться по умолчанию`
+      )
+    } catch (e) {
+      console.error(e)
+      return stickersQuestion.replyWithMarkdown(
+        ctx,
+        'Произошла ошибка, проверьте что вы отправляете стикер из набора и повторите еще раз',
+        additionalState
+      )
+    }
+  }
+)

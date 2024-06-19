@@ -1,5 +1,5 @@
 import mime from 'mime/lite'
-import { getBot } from '../../src/participant/index.mjs'
+import { findBot } from '../../src/participant/index.mjs'
 import { getHeaders } from '../../src/utils/telegram-bot.mjs'
 
 const api = 'api.telegram.org'
@@ -15,7 +15,7 @@ export default async req => {
     mime_sub_type = 'webp',
     mime_base_type = 'image',
   } = query
-  const bot = await getBot({ id: parseInt(bot_id) })
+  const bot = await findBot({ id: parseInt(bot_id) })
   const { file_path } = await bot.api.getFile(file_id)
   const mime_type = `${mime_base_type}/${mime_sub_type}`
   const extension = mime.getExtension(mime_type)

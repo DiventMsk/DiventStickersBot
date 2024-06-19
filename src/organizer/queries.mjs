@@ -1,7 +1,7 @@
 import Papa from 'papaparse'
 import { InputFile } from 'grammy'
 import { bots, clients, participants } from '../db.mjs'
-import { stickerQuestion } from './questions.mjs'
+import { stickerQuestion, stickersQuestion } from './questions.mjs'
 import { InlineKeyboardWithJSON } from '../utils/telegram-bot.mjs'
 
 const columns = {
@@ -13,15 +13,20 @@ const columns = {
 
 export function edit(ctx, bot) {
   if (!bot) return ctx.reply('Указанный бот не найден')
-  const { id } = bot
-  return ctx.reply(id, {
-    reply_markup: new InlineKeyboardWithJSON()
-      .json('Скачать список участников', { id, action: 'export' })
-      .json('Выбрать стикер по умолчанию', { id, action: 'sticker' })
-      .json('Выбрать площадку', { id, action: 'client' })
-      .json('Удалить бота', { id, action: 'delete' })
-      .toFlowed(1),
-  })
+  const { id, username } = bot
+  return ctx.reply(
+    `Для настройки бота ${username} выберите необходимый пункт в меню`,
+    {
+      reply_markup: new InlineKeyboardWithJSON()
+        .json('Скачать список участников', { id, action: 'export' })
+        .json('Настройка генеративных стикеров', { id, action: 'generative' })
+        .json('Изменить набор стикеров', { id, action: 'stickers' })
+        .json('Сбросить участников', { id, action: 'reset' })
+        .json('Изменить площадку', { id, action: 'client' })
+        .json('Удалить бота', { id, action: 'delete' })
+        .toFlowed(1),
+    }
+  )
 }
 
 export async function callbackQueryMiddleware(ctx) {
@@ -34,6 +39,11 @@ export async function callbackQueryMiddleware(ctx) {
       if (!bot) return ctx.reply('Указанный бот не найден')
       const { deletedCount: ok } = await bots.deleteOne({ id })
       return ctx.reply(ok ? 'Бот успешно удален' : 'Не удалось удалить бота')
+    case 'reset':
+      await participants.deleteMany({
+        [`value.bots.${bot.username}`]: { $exists: true },
+      })
+      return ctx.reply('Список участников сброшен')
     case 'export':
       const field = `value.bots.${bot.username}`
       const botParticipants = await participants
@@ -62,6 +72,12 @@ export async function callbackQueryMiddleware(ctx) {
         'Отправьте изображение для стикера по умолчанию',
         JSON.stringify({ id })
       )
+    case 'stickers':
+      return stickersQuestion.replyWithMarkdown(
+        ctx,
+        'Отправьте любой стикер из набора, который будет использоваться по умолчанию',
+        JSON.stringify({ id })
+      )
     case 'client':
       const allClients = await clients.find().toArray()
       const buttons = allClients.map(({ client, date }) =>
@@ -79,6 +95,19 @@ export async function callbackQueryMiddleware(ctx) {
       await bots.updateMany({ client }, { $set: { client: null } })
       await bots.updateOne({ id }, { $set: { client } })
       return ctx.reply(`Площадка ${client} связана с ботом`)
+    case 'generative':
+      return ctx.reply(
+        `Генеративные стикеры отключены, нажмите для активавции и настройки`,
+        {
+          rereply_markup: new InlineKeyboardWithJSON().json(
+            'Включить генеративные стикеры',
+            {
+              id,
+              action: 'client',
+            }
+          ),
+        }
+      )
   }
   return ctx.answerCallbackQuery({
     text: 'Действие не поддерживается',

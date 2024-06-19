@@ -262,17 +262,21 @@ privateChats.on('message:text', ctx =>
 export async function getBotFromClient(req) {
   const { searchParams } = new URL(req.url)
   const client = searchParams.get('id').trim()
-  return getBot({ client })
+  return findBot({ client })
 }
 
 export async function getBotFromID(req) {
   const { searchParams } = new URL(req.url)
   const id = parseInt(searchParams.get('id').trim())
-  return getBot({ id })
+  return findBot({ id })
 }
 
-export async function getBot(filter = {}) {
+export async function findBot(filter = {}) {
   const data = await bots.findOne(filter)
+  return getBot(data)
+}
+
+export function getBot(data) {
   const bot = new Bot(data.token, {
     ContextConstructor: class extends Context {
       constructor(update, api, me) {
