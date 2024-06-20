@@ -177,53 +177,65 @@ privateChats.command('start', async (ctx, next) => {
         .addStickerToSet(ctx.chat.id, name, sticker)
         .catch(console.error)
   } catch {
-    const {
-      sticker,
-      images = defaultImages,
-      stickers: defaultStickers = [sticker],
-    } = ctx.data
-    const targetImages = images[session.sex] || []
-    const botStickers = defaultStickers.filter(Boolean).map(toSticker)
+    const { set_name, generative, generative_sets = {} } = ctx.data
+    const { stickers: defaultStickers = [] } =
+      await ctx.api.getStickerSet(set_name)
+    const botStickers = defaultStickers
+      .map(sticker => sticker.file_id)
+      .map(toSticker)
     const initialStickers = [...botStickers, ...userStickers].filter(Boolean)
     await ctx.api.createNewStickerSet(ctx.chat.id, name, title, initialStickers)
-    if (ctx.data.generative && userStickers.length && targetImages.length) {
-      const swap_image = getFileURL({
-        bot_id: ctx.me.id,
-        mime_type: 'image/webp',
-        file_name: 'sticker.webp',
-        file_id: session.stickers.at(0),
-      })
-      taskPromise = Promise.allSettled(
-        targetImages
-          .map(path => getURL({ path }))
-          .map(async target_image => {
-            console.debug('body', {
-              target_image,
-              swap_image,
-            })
-            const asyncResult = await fetch(api.async, {
-              body: JSON.stringify({
-                result_type: 'url',
+    if (generative && userStickers.length) {
+      const { stickers = [] } = await ctx.api.getStickerSet(
+        generative_sets[session.sex]
+      )
+      const targetImages = stickers.map(({ file_id } = {}) =>
+        getFileURL({
+          file_id,
+          bot_id: ctx.me.id,
+          mime_type: 'image/webp',
+          file_name: 'sticker.webp',
+        })
+      )
+      if (targetImages.length) {
+        const swap_image = getFileURL({
+          bot_id: ctx.me.id,
+          mime_type: 'image/webp',
+          file_name: 'sticker.webp',
+          file_id: session.stickers.at(0),
+        })
+        taskPromise = Promise.allSettled(
+          targetImages
+            .map(path => getURL({ path }))
+            .map(async target_image => {
+              console.debug('body', {
                 target_image,
                 swap_image,
-              }),
-              ...init,
-            }).then(res => res.json())
-            console.debug('asyncResult', asyncResult)
-            const {
-              data: { task_id },
-            } = asyncResult
-            await fetch(QUEUE_URL, {
-              body: JSON.stringify({
-                user_id: ctx.chat.id,
-                bot_id: ctx.me.id,
-                task_id,
-                name,
-              }),
-              ...init,
+              })
+              const asyncResult = await fetch(api.async, {
+                body: JSON.stringify({
+                  result_type: 'url',
+                  target_image,
+                  swap_image,
+                }),
+                ...init,
+              }).then(res => res.json())
+              console.debug('asyncResult', asyncResult)
+              const {
+                data: { task_id },
+              } = asyncResult
+              await fetch(QUEUE_URL, {
+                body: JSON.stringify({
+                  user_id: ctx.chat.id,
+                  bot_id: ctx.me.id,
+                  task_id,
+                  name,
+                }),
+                ...init,
+              })
             })
-          })
-      )
+        )
+      }
     }
   }
   await ctx.reply(`Стикеров загружено в ваш набор: ${userStickers.length}`, {
