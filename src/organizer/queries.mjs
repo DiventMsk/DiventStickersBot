@@ -15,7 +15,7 @@ export function edit(ctx, bot) {
   if (!bot) return ctx.reply('Указанный бот не найден')
   const { id, username } = bot
   return ctx.reply(
-    `Для настройки бота ${username} выберите необходимый пункт в меню`,
+    `Для настройки бота @${username} выберите необходимый пункт в меню`,
     {
       reply_markup: new InlineKeyboardWithJSON()
         .json('Скачать список участников', { id, action: 'export' })
@@ -55,7 +55,8 @@ export function generative(ctx, bot) {
           action: 'generative_stickers',
           sex: 'female',
           id,
-        }),
+        })
+        .toFlowed(1),
     }
   )
 }
@@ -124,7 +125,8 @@ export async function callbackQueryMiddleware(ctx) {
     case 'generative':
       return generative(ctx, bot)
     case 'toggle_generative':
-      await bots.updateOne({ id }, { $set: { generative: true } })
+      await bots.updateOne({ id }, { $set: { generative: !!bot.generative } })
+      await ctx.deleteMessage().catch(console.error)
       return generative(ctx, await bots.findOne({ id }))
     case 'generative_stickers':
       const { sex } = data
