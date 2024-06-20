@@ -1,4 +1,5 @@
 import { getBotFromClient } from '../../../src/participant/index.mjs'
+import { bots } from '../../../src/db.mjs'
 import { InputFile } from 'grammy'
 
 export const config = { runtime: 'edge' }
