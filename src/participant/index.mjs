@@ -26,20 +26,6 @@ const init = {
   headers: { 'Content-Type': 'application/json', 'X-API-Key': GOAPI_KEY },
 }
 
-const getDefaultImages = (offset = 1, length = 10) => {
-  const array = new Array(length).fill(0)
-  return array.map((_, index) => `/images/faces/${index + offset}.png`)
-}
-
-const defaultImages = {
-  get male() {
-    return getDefaultImages(1, 10)
-  },
-  get female() {
-    return getDefaultImages(11, 10)
-  },
-}
-
 const toSticker = sticker => ({ emoji_list: ['✨'], format: 'static', sticker })
 
 export const composer = new Composer()
@@ -186,13 +172,13 @@ privateChats.command('start', async (ctx, next) => {
     const initialStickers = [...botStickers, ...userStickers].filter(Boolean)
     await ctx.api.createNewStickerSet(ctx.chat.id, name, title, initialStickers)
     if (generative && userStickers.length) {
-      const { stickers = [] } = await ctx.api.getStickerSet(
+      const { stickers = [] } = await new Bot(token).api.getStickerSet(
         generative_sets[session.sex]
       )
       const targetImages = stickers.map(({ file_id } = {}) =>
         getFileURL({
           file_id,
-          bot_id: ctx.me.id,
+          bot_id: 'main',
           mime_type: 'image/webp',
           file_name: 'sticker.webp',
         })

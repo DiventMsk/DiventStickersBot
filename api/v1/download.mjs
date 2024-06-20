@@ -1,10 +1,13 @@
 import mime from 'mime/lite'
 import { findBot } from '../../src/participant/index.mjs'
 import { getHeaders } from '../../src/utils/telegram-bot.mjs'
+import { Bot } from 'grammy'
 
 const api = 'api.telegram.org'
 
 export const config = { runtime: 'edge' }
+
+const { TELEGRAM_BOT_TOKEN: token } = process.env
 
 export default async req => {
   const { searchParams } = new URL(req.url)
@@ -15,7 +18,8 @@ export default async req => {
     mime_sub_type = 'webp',
     mime_base_type = 'image',
   } = query
-  const bot = await findBot({ id: parseInt(bot_id) })
+  const id = parseInt(bot_id)
+  const bot = bot_id === 'main' ? new Bot(token) : await findBot({ id })
   const { file_path } = await bot.api.getFile(file_id)
   const mime_type = `${mime_base_type}/${mime_sub_type}`
   const extension = mime.getExtension(mime_type)
