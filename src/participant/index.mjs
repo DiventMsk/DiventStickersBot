@@ -15,7 +15,12 @@ import { conversations, createConversation } from '@grammyjs/conversations'
 import { getFileURL, getRandomIntInclusive } from '../utils/telegram-bot.mjs'
 import { stickersQuestion } from '../organizer/questions.mjs'
 
-const { GOAPI_KEY, QUEUE_URL, TELEGRAM_BOT_TOKEN: token } = process.env
+const {
+  GOAPI_KEY,
+  QUEUE_URL,
+  TELEGRAM_BOT_TOKEN: token,
+  STICKERS_SET_PREFIX: prefix = '',
+} = process.env
 
 const api = {
   async: 'https://api.goapi.xyz/api/face_swap/v1/async',
@@ -158,7 +163,7 @@ privateChats.command('start', async (ctx, next) => {
     .toLocaleString('ru', { dateStyle: 'short' })
     .replaceAll('.', '_')
   const title = 'Stickers by @DiventDigital'
-  const name = `at_${date}_for_${ctx.chat.id}_by_${ctx.me.username}`
+  const name = `${prefix}at_${date}_for_${ctx.chat.id}_by_${ctx.me.username}`
   const { href } = new URL(name, 'https://t.me/addstickers/')
   const session = await sessions.findOneAndUpdate(
     {
