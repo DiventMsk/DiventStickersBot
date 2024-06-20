@@ -109,11 +109,17 @@ export async function callbackQueryMiddleware(ctx) {
     case 'client':
       const allClients = await clients.find().toArray()
       const buttons = allClients.map(({ client, date }) =>
-        InlineKeyboardWithJSON.json(`${client} (${date})`, {
-          action: 'set_client',
-          client,
-          id,
-        })
+        InlineKeyboardWithJSON.json(
+          `${client} (${Intl.DateTimeFormat('ru-RU', {
+            dateStyle: 'short',
+            timeStyle: 'short',
+          }).format(date)})`,
+          {
+            action: 'set_client',
+            client,
+            id,
+          }
+        )
       )
       return ctx.reply(
         'Выберите площадку, которая будет связана с этим ботом',
