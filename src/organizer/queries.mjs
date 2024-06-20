@@ -1,11 +1,7 @@
 import Papa from 'papaparse'
 import { InputFile } from 'grammy'
 import { bots, clients, participants } from '../db.mjs'
-import {
-  generativeStickersQuestion,
-  stickerQuestion,
-  stickersQuestion,
-} from './questions.mjs'
+import { generativeStickersQuestion, stickerQuestion } from './questions.mjs'
 import { InlineKeyboardWithJSON } from '../utils/telegram-bot.mjs'
 
 const columns = {
@@ -24,7 +20,7 @@ export function edit(ctx, bot) {
       reply_markup: new InlineKeyboardWithJSON()
         .json('Скачать список участников', { id, action: 'export' })
         .json('Настройка генеративных стикеров', { id, action: 'generative' })
-        .json('Изменить набор стикеров', { id, action: 'stickers' })
+        .url('Изменить набор стикеров', `t.me/${username}?start=stickers`)
         .json('Сбросить участников', { id, action: 'reset' })
         .json('Изменить площадку', { id, action: 'client' })
         .json('Удалить бота', { id, action: 'delete' })
@@ -106,12 +102,6 @@ export async function callbackQueryMiddleware(ctx) {
       return stickerQuestion.replyWithMarkdown(
         ctx,
         'Отправьте изображение для стикера по умолчанию',
-        JSON.stringify({ id })
-      )
-    case 'stickers':
-      return stickersQuestion.replyWithMarkdown(
-        ctx,
-        'Отправьте любой стикер из набора, который будет использоваться по умолчанию',
         JSON.stringify({ id })
       )
     case 'client':

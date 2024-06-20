@@ -13,6 +13,7 @@ import { MongoDBAdapter } from '@grammyjs/storage-mongodb'
 import { bots, participants as collection, sessions } from '../db.mjs'
 import { conversations, createConversation } from '@grammyjs/conversations'
 import { getFileURL, getRandomIntInclusive } from '../utils/telegram-bot.mjs'
+import { stickersQuestion } from '../organizer/questions.mjs'
 
 const { GOAPI_KEY, QUEUE_URL, TELEGRAM_BOT_TOKEN: token } = process.env
 
@@ -32,17 +33,30 @@ export const composer = new Composer()
 
 const privateChats = composer.errorBoundary(console.error).chatType('private')
 
+privateChats.use(stickersQuestion.middleware())
+
 privateChats.command('start', (ctx, next) => {
-  if (ctx.match !== 'setup' || ctx.chat.id !== ctx.data.creator) return next()
-  return ctx.reply(
-    'Для завершения настройки бота, нужно выбрать чат, в который будут загружаться изображения перед созданием наборов',
-    {
-      reply_markup: new Keyboard()
-        .requestChat('Продолжить', 0, { bot_is_member: true })
-        .oneTime()
-        .resized(),
+  if (ctx.chat.id === ctx.data.creator) {
+    switch (ctx.match) {
+      case 'setup':
+        return ctx.reply(
+          'Для завершения настройки бота, нужно выбрать чат, в который будут загружаться изображения перед созданием наборов',
+          {
+            reply_markup: new Keyboard()
+              .requestChat('Продолжить', 0, { bot_is_member: true })
+              .oneTime()
+              .resized(),
+          }
+        )
+      case 'stickers':
+        return stickersQuestion.replyWithMarkdown(
+          ctx,
+          'Отправьте любой стикер из набора, который будет использоваться по умолчанию',
+          JSON.stringify({})
+        )
     }
-  )
+  }
+  return next()
 })
 
 privateChats.on('msg:chat_shared', async (ctx, next) => {
@@ -57,7 +71,7 @@ privateChats.on('msg:chat_shared', async (ctx, next) => {
     {
       reply_markup: new InlineKeyboard().url(
         'Настроить бота',
-        `https://t.me/${bot.botInfo.username}?start=${id}`
+        `t.me/${bot.botInfo.username}?start=${id}`
       ),
     }
   )
@@ -145,7 +159,7 @@ privateChats.command('start', async (ctx, next) => {
     .replaceAll('.', '_')
   const title = 'Stickers by @DiventDigital'
   const name = `at_${date}_for_${ctx.chat.id}_by_${ctx.me.username}`
-  const { href } = new URL(name, 'https://t.me/addstickers/')
+  const { href } = new URL(name, 't.me/addstickers/')
   const session = await sessions.findOneAndUpdate(
     {
       _id: new BSON.ObjectId(id),

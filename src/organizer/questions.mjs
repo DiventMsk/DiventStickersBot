@@ -19,7 +19,7 @@ export const tokenQuestion = new StatelessQuestion('token', async ctx => {
     {
       reply_markup: new InlineKeyboard().url(
         'Запустить бота',
-        `https://t.me/${username}?start=setup`
+        `t.me/${username}?start=setup`
       ),
     }
   )
@@ -37,7 +37,9 @@ export const stickerQuestion = new StatelessQuestion(
       )
     const { id } = JSON.parse(additionalState)
     await bots.updateOne({ id }, { $set: { sticker } })
-    await ctx.reply('Стикер будет использоваться в наборах по умолчанию')
+    await ctx.reply('Стикер будет использоваться в наборах по умолчанию', {
+      reply_markup: { remove_keyboard: true },
+    })
   }
 )
 
@@ -46,11 +48,14 @@ export const stickersQuestion = new StatelessQuestion(
   async (ctx, additionalState) => {
     try {
       const { set_name } = ctx.msg.sticker
-      const { id } = JSON.parse(additionalState)
+      const { id = ctx.me.id } = JSON.parse(additionalState)
       const { title } = await ctx.api.getStickerSet(set_name)
       await bots.updateOne({ id }, { $set: { set_name } })
       return ctx.reply(
-        `Готово, стикеры из набора "${title}" будут использоваться по умолчанию`
+        `Готово, стикеры из набора "${title}" будут использоваться по умолчанию`,
+        {
+          reply_markup: { remove_keyboard: true },
+        }
       )
     } catch (e) {
       console.error(e)
@@ -75,7 +80,10 @@ export const generativeStickersQuestion = new StatelessQuestion(
         { $set: { [`generative_sets.${sex}`]: set_name } }
       )
       return ctx.reply(
-        `Готово, стикеры из набора "${title}" будут использоваться для генерации ${sex}`
+        `Готово, стикеры из набора "${title}" будут использоваться для генерации ${sex}`,
+        {
+          reply_markup: { remove_keyboard: true },
+        }
       )
     } catch (e) {
       console.error(e)
