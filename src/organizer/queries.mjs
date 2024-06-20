@@ -30,6 +30,7 @@ export function edit(ctx, bot) {
 }
 
 export function generative(ctx, bot) {
+  if (!bot) return ctx.reply('Указанный бот не найден')
   const { id, generative } = bot
   return ctx.reply(
     generative
@@ -125,7 +126,7 @@ export async function callbackQueryMiddleware(ctx) {
     case 'generative':
       return generative(ctx, bot)
     case 'toggle_generative':
-      await bots.updateOne({ id }, { $set: { generative: !!bot.generative } })
+      await bots.updateOne({ id }, { $set: { generative: !bot.generative } })
       await ctx.deleteMessage().catch(console.error)
       return generative(ctx, await bots.findOne({ id }))
     case 'generative_stickers':
