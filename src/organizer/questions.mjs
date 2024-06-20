@@ -10,7 +10,7 @@ export const tokenQuestion = new StatelessQuestion('token', async ctx => {
   await bot.init()
   const { id: creator } = ctx.chat
   const { id, username } = bot.botInfo
-  const $set = { ...bot.botInfo, token, creator }
+  const $set = { ...bot.botInfo, token, creator, generative_sets: {} }
   const url = getURL({ path: `api/v1/webhook/${id}` })
   await bots.updateOne({ id }, { $set }, { upsert: true })
   await bot.api.setWebhook(url, { secret_token: secretTokenFromToken(token) })
@@ -55,6 +55,31 @@ export const stickersQuestion = new StatelessQuestion(
     } catch (e) {
       console.error(e)
       return stickersQuestion.replyWithMarkdown(
+        ctx,
+        'Произошла ошибка, проверьте что вы отправляете стикер из набора и повторите еще раз',
+        additionalState
+      )
+    }
+  }
+)
+
+export const generativeStickersQuestion = new StatelessQuestion(
+  'generative_stickers',
+  async (ctx, additionalState) => {
+    try {
+      const { set_name } = ctx.msg.sticker
+      const { id, sex } = JSON.parse(additionalState)
+      const { title } = await ctx.api.getStickerSet(set_name)
+      await bots.updateOne(
+        { id },
+        { $set: { [`generative_sets.${sex}`]: set_name } }
+      )
+      return ctx.reply(
+        `Готово, стикеры из набора "${title}" будут использоваться для генерации ${sex}`
+      )
+    } catch (e) {
+      console.error(e)
+      return generativeStickersQuestion.replyWithMarkdown(
         ctx,
         'Произошла ошибка, проверьте что вы отправляете стикер из набора и повторите еще раз',
         additionalState

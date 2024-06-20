@@ -1,7 +1,11 @@
 import Papa from 'papaparse'
 import { InputFile } from 'grammy'
 import { bots, clients, participants } from '../db.mjs'
-import { stickerQuestion, stickersQuestion } from './questions.mjs'
+import {
+  generativeStickersQuestion,
+  stickerQuestion,
+  stickersQuestion,
+} from './questions.mjs'
 import { InlineKeyboardWithJSON } from '../utils/telegram-bot.mjs'
 
 const columns = {
@@ -29,6 +33,37 @@ export function edit(ctx, bot) {
   )
 }
 
+export function generative(ctx, bot) {
+  const { id, generative } = bot
+  return ctx.reply(
+    generative
+      ? `Генеративные стикеры включены, выберите набор для настройки`
+      : `Генеративные стикеры отключены, нажмите для активации и настройки`,
+    {
+      reply_markup: new InlineKeyboardWithJSON()
+        .json(
+          generative
+            ? 'Выключить генеративные стикеры'
+            : 'Включить генеративные стикеры',
+          {
+            action: 'toggle_generative',
+            id,
+          }
+        )
+        .json('Мужской пол', {
+          action: 'generative_stickers',
+          sex: 'male',
+          id,
+        })
+        .json('Женский пол', {
+          action: 'generative_stickers',
+          sex: 'female',
+          id,
+        }),
+    }
+  )
+}
+
 export async function callbackQueryMiddleware(ctx) {
   const { action, id, client, ...data } = JSON.parse(ctx.callbackQuery.data)
   const bot = await bots.findOne({ id })
@@ -44,7 +79,7 @@ export async function callbackQueryMiddleware(ctx) {
         [`value.bots.${bot.username}`]: { $exists: true },
       })
       return ctx.reply('Список участников сброшен')
-    case 'export':
+    case 'export': {
       const field = `value.bots.${bot.username}`
       const botParticipants = await participants
         .find({ [field]: { $exists: true } })
@@ -66,6 +101,7 @@ export async function callbackQueryMiddleware(ctx) {
       const stream = new Blob([csv]).stream()
       const file = new InputFile(stream, `${bot.username}.csv`)
       return ctx.replyWithDocument(file)
+    }
     case 'sticker':
       return stickerQuestion.replyWithMarkdown(
         ctx,
@@ -96,17 +132,16 @@ export async function callbackQueryMiddleware(ctx) {
       await bots.updateOne({ id }, { $set: { client } })
       return ctx.reply(`Площадка ${client} связана с ботом`)
     case 'generative':
-      return ctx.reply(
-        `Генеративные стикеры отключены, нажмите для активавции и настройки`,
-        {
-          rereply_markup: new InlineKeyboardWithJSON().json(
-            'Включить генеративные стикеры',
-            {
-              id,
-              action: 'toggle_generative',
-            }
-          ),
-        }
+      return generative(ctx, bot)
+    case 'toggle_generative':
+      await bots.updateOne({ id }, { $set: { generative: true } })
+      return generative(ctx, await bots.findOne({ id }))
+    case 'generative_stickers':
+      const { sex } = data
+      return generativeStickersQuestion.replyWithMarkdown(
+        ctx,
+        `Отправьте любой стикер из набора, который будет использоваться для генерации ${sex}`,
+        JSON.stringify({ id, sex })
       )
   }
   return ctx.answerCallbackQuery({
