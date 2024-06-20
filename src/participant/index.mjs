@@ -159,7 +159,7 @@ privateChats.command('start', async (ctx, next) => {
     .replaceAll('.', '_')
   const title = 'Stickers by @DiventDigital'
   const name = `at_${date}_for_${ctx.chat.id}_by_${ctx.me.username}`
-  const { href } = new URL(name, 't.me/addstickers/')
+  const { href } = new URL(name, 'https://t.me/addstickers/')
   const session = await sessions.findOneAndUpdate(
     {
       _id: new BSON.ObjectId(id),
