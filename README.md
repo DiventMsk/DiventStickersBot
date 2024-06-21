@@ -1,7 +1,7 @@
 Run script by:
 
 ```shell
-node . public/Logo.webp
+node . --sex male path/to/image.webp
 ```
 
 or
