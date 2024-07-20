@@ -183,8 +183,9 @@ privateChats.command('start', async (ctx, next) => {
         .catch(console.error)
   } catch {
     const { set_name, generative, generative_sets = {} } = ctx.data
-    const { stickers: defaultStickers = [] } =
-      await ctx.api.getStickerSet(set_name)
+    const { stickers: defaultStickers = [] } = await ctx.api
+      .getStickerSet(set_name)
+      .catch(() => ({}))
     const botStickers = defaultStickers
       .map(sticker => sticker.file_id)
       .map(toSticker)
