@@ -28,10 +28,11 @@ const api = {
   group: new URL(`api/v1/group/${CLIENT_ID}`, API_URL),
 }
 
-void fetch(api.client)
+const requestPromise = fetch(api.client)
 
 if (!input.length) {
   console.log(api.client.href)
+  console.log(await requestPromise.then(r => r.json()))
   process.exit()
 }
 
