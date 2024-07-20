@@ -31,7 +31,7 @@ const api = {
 void fetch(api.client)
 
 if (!input.length) {
-  console.log(CLIENT_ID)
+  console.log(api.client)
   process.exit()
 }
 
