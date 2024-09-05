@@ -1,0 +1,12 @@
+{
+  "name": "@divent/stickers-client",
+  "version": "0.0.0",
+  "bin": "index.mjs",
+  "author": "Vladislav Ponomarev <PonomareVlad@users.noreply.github.com> (https://PonomareVlad.ru)",
+  "dependencies": {
+    "meow": "^13.2.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}
